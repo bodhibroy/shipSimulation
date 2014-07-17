@@ -1,3 +1,13 @@
+// Misc Things
+var misc = {}
+misc.componentToHex = function(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+misc.rgbToHex = function(r, g, b) {
+    return "#" + misc.componentToHex(r) + misc.componentToHex(g) + misc.componentToHex(b);
+}
+
 // Coordinate Things
 var coordThings = {
 	delta : function(dx, dy) {
@@ -139,7 +149,7 @@ shipFactory.makeShipPath = function(dims, angle, basePosition, dv) {
 shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	var ship = {}
 
-	ship.__dims = dims
+	ship._dims = dims
 	ship.basePosition = basePosition
 	ship.v = v
 	ship.theta = theta
@@ -147,15 +157,23 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.safetyRadius = 0
 	ship.fwdDistance = 0
 	ship.fwdAngle = 0
+	ship._shipPoly = null
+	ship._shipDomainPoly = null
+	ship._map = null
 
+	ship.getDims = function() {
+		return shipFactory.makeShipDims(ship._dims.length, ship._dims.breadth, ship._dims.fwd)
+	}
 	ship.updatePosition = function(_v, _theta) {
 		ship.v = _v
 		ship.theta = _theta
+		ship.updateShipPoly()
 	}
 	ship.updateDomainParams = function(_safety_radius, _fwd_distance, _fwd_angle) {
 		ship.safetyRadius = _safety_radius
 		ship.fwdDistance = _fwd_distance
 		ship.fwdAngle = _fwd_angle
+		ship.updateDomainPoly()
 	}
 	ship.makeShipPath = function() {
 		var path = coordThings.pathFromMetricDeltas(ship.basePosition, ship.v, ship.shipVerts, ship.theta)
@@ -166,13 +184,13 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		var path = coordThings.pathFromMetricDeltas(ship.basePosition, ship.v, domainVerts, ship.theta)
 		return path
 	}
-	ship.makeShipPoly = function(strokeColor, fillColor) {
+	ship.makeShipPoly = function() {
 		var path = ship.makeShipPath()
 		poly = new google.maps.Polygon({
 			path: path,
-			strokeColor: strokeColor,
+			strokeColor: '#00ff00',
 			strokeOpacity: 0.8,
-			fillColor: fillColor,
+			fillColor: '#00ff00',
 			fillOpacity: 0.4,
 			strokeWeight: 2
 		})
@@ -208,13 +226,13 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 			}
 		}
 	}
-	ship.makeDomainPoly = function(strokeColor, fillColor) {
+	ship.makeDomainPoly = function() {
 		var path = ship.makeDomainPath()
 		poly = new google.maps.Polygon({
 			path: path,
-			strokeColor: strokeColor,
+			strokeColor: '#ff0000',
 			strokeOpacity: 0.1,
-			fillColor: fillColor,
+			fillColor: '#ff0000',
 			fillOpacity: 0.1,
 			strokeWeight: 2
 		})
@@ -230,16 +248,24 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 			}
 		}
 	}
-	ship.updatePolys = function() {
-		ship.updateShipPoly()
-		ship.updateDomainPoly()
+	ship.placeOnMap = function(map) {
+		if (!ship._map) {
+			ship._shipDomainPoly.setMap(map);
+			ship._shipPoly.setMap(map);
+
+			ship._map = map
+		}
 	}
-	ship.putPolysOnMap = function(map) {
-		ship._shipDomainPoly.setMap(map);
-		ship._shipPoly.setMap(map);
+	ship.removeFromMap = function(map) {
+		if (ship._map) {
+			ship._shipDomainPoly.setMap(null);
+			ship._shipPoly.setMap(null);
+
+			ship._map = null
+		}
 	}
-	_shipPoly = ship.makeShipPoly('#00ff00', '#00ff00')
-	_shipDomainPoly = ship.makeDomainPoly('#ff0000', '#ff0000')
+	_shipPoly = ship.makeShipPoly()
+	_shipDomainPoly = ship.makeDomainPoly()
 
 	return ship
 }
