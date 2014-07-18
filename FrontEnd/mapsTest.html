@@ -1,4 +1,3 @@
-
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
@@ -20,7 +19,7 @@ function driftPoly(ship, dv, angle, speed) {
 	var newDv = coordThings.shiftMetric(dv, coordThings.makeVector(angle, newSpeed))
 	ship.updatePosition(newDv, newAngle)
 	ship.updateDomainParams(	ship.safetyRadius, 
-								speed * 3,
+								speed * 3 + ship._dims.fwd,
 								Math.min(45, 25.0 / speed)
 								)
 

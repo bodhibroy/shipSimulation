@@ -167,6 +167,7 @@ coordThings.isPointInPoly = function(pt, verts) {
 
 {
 	var vvvv = [coordThings.delta(0,0), coordThings.delta(2,0), coordThings.delta(0.5,0.5), coordThings.delta(0,2)]
+	var vvvv2 = [coordThings.delta(0,0), coordThings.delta(2,0), coordThings.delta(0.5,0.5), coordThings.delta(0,2)]
 	var pt_in = coordThings.delta(0.25, 0.25)
 	var pt_out1 = coordThings.delta(1, 1);
 	var pt_out2 = coordThings.delta(1, -1);
@@ -203,7 +204,14 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 
 	return [	
 				{dx: 0, dy: dims.breadth/2.0 + safety_radius},
+				
 
+				// Parameterize here
+				{dx: 0.25 * -dims.length/2.0 , dy: dims.breadth/2.0 + safety_radius},
+				{dx: 0.5 * -dims.length/2.0, dy: dims.breadth/2.0 + safety_radius},
+				{dx: 0.75 * -dims.length/2.0, dy: dims.breadth/2.0 + safety_radius},
+
+				// Parameterize here
 				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(90), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(90)},
 				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(112.5), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(112.5)},
 				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(135), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(135)},
@@ -216,8 +224,23 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(247.5), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(247.5)},
 				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(270), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(270)},
 
+				// Parameterize here
+				{dx: 0.75 * -dims.length/2.0, dy: -dims.breadth/2.0 - safety_radius},
+				{dx: 0.5 * -dims.length/2.0, dy: -dims.breadth/2.0 - safety_radius},
+				{dx: 0.25 * -dims.length/2.0, dy: -dims.breadth/2.0 - safety_radius},
+
+
 				{dx: 0, dy: -dims.breadth/2.0 - safety_radius},
 
+
+				// Interpololate here
+				{	dx: (dims.length/2+fwd_distance)*(coordThings.cosDeg(-fwd_angle)) + (-dims.breadth/2-safety_radius)*(-coordThings.sinDeg(-fwd_angle)),
+					dy: (dims.length/2+fwd_distance)*(coordThings.sinDeg(-fwd_angle)) + (-dims.breadth/2-safety_radius)*(coordThings.cosDeg(-fwd_angle))
+				},
+
+
+
+				// Parameterize here (sharpen the nose)
 				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+0*dtc))*(coordThings.cosDeg(-fwd_angle+0*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+0*dtc))*(-coordThings.sinDeg(-fwd_angle+0*dto)),
 					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+0*dtc))*(coordThings.sinDeg(-fwd_angle+0*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+0*dtc))*(coordThings.cosDeg(-fwd_angle+0*dto))
 				},
@@ -249,7 +272,17 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+8*dtc))*(coordThings.cosDeg(-fwd_angle+8*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+8*dtc))*(-coordThings.sinDeg(-fwd_angle+8*dto)),
 					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+8*dtc))*(coordThings.sinDeg(-fwd_angle+8*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+8*dtc))*(coordThings.cosDeg(-fwd_angle+8*dto))
 				},
-				// Not closed
+
+
+
+				// Interpololate here
+				{	dx: (dims.length/2+fwd_distance)*(coordThings.cosDeg(fwd_angle)) + (dims.breadth/2+safety_radius)*(-coordThings.sinDeg(fwd_angle)),
+					dy: (dims.length/2+fwd_distance)*(coordThings.sinDeg(fwd_angle)) + (dims.breadth/2+safety_radius)*(coordThings.cosDeg(fwd_angle))
+				},
+
+
+
+				{dx: 0, dy: dims.breadth/2.0 + safety_radius}
 				]
 }
 
