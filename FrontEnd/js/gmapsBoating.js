@@ -7,6 +7,53 @@ misc.componentToHex = function(c) {
 misc.rgbToHex = function(r, g, b) {
     return "#" + misc.componentToHex(r) + misc.componentToHex(g) + misc.componentToHex(b);
 }
+misc.reduceFunctionMinX = function(previousValue, currentValue, index, array) {
+	return Math.min(previousValue, currentValue.dx)
+}
+misc.reduceFunctionMaxX = function(previousValue, currentValue, index, array) {
+	return Math.max(previousValue, currentValue.dx)
+}
+misc.reduceFunctionMinY = function(previousValue, currentValue, index, array) {
+	return Math.min(previousValue, currentValue.dy)
+}
+misc.reduceFunctionMaxY = function(previousValue, currentValue, index, array) {
+	return Math.max(previousValue, currentValue.dy)
+}
+
+
+// Testing Stuff
+var tests = {}
+tests.assertEqual = function(testName, v1, v2) {
+	if (v1 !== v2) {
+		console.log("(" + testName + ") [EqS] Assertion failed: " + v1 + " (expected: "+v2+")")
+	}
+}
+tests.assertEqual = function(testName, v1, v2) {
+	if (v1 != v2) {
+		console.log("(" + testName + ") [Eq] Assertion failed: " + v1 + " (expected: "+v2+")")
+	}
+}
+tests.assertGT = function(testName, v1, v2) {
+	if (v1 <= v2) {
+		console.log("(" + testName + ") [GT] Assertion failed: " + v1 + " (expected: "+v2+")")
+	}
+}
+tests.assertGE = function(testName, v1, v2) {
+	if (v1 < v2) {
+		console.log("(" + testName + ") [GE] Assertion failed: " + v1 + " (expected: "+v2+")")
+	}
+}
+tests.assertLT = function(testName, v1, v2) {
+	if (v1 >= v2) {
+		console.log("(" + testName + ") [LT] Assertion failed: " + v1 + " (expected: "+v2+")")
+	}
+}
+tests.assertLE = function(testName, v1, v2) {
+	if (v1 > v2) {
+		console.log("(" + testName + ") [LE] Assertion failed: " + v1 + " (expected: "+v2+")")
+	}
+}
+
 
 // Coordinate Things
 var coordThings = {
@@ -53,7 +100,18 @@ var coordThings = {
 
 	shiftLatLng : function(ll, dll) {
 		return new google.maps.LatLng(ll.lat() + dll.dlat, ll.lng() + dll.dlng)
-	}
+	},
+
+	boundingBox : function(verts) {
+		bb = {}
+		bb.x_min = verts.reduce(misc.reduceFunctionMinX, Infinity)
+		bb.x_max = verts.reduce(misc.reduceFunctionMaxX, -Infinity)
+		bb.y_min = verts.reduce(misc.reduceFunctionMinY, Infinity)
+		bb.y_max = verts.reduce(misc.reduceFunctionMaxY, -Infinity)
+
+		return bb
+	},
+
 }
 coordThings.shiftLatLngMetric = function(ll, dv) {
 	dll = coordThings.metresToDeg(dv)
@@ -65,8 +123,61 @@ coordThings.pathFromMetricDeltas = function(refLL, dv, verts, angle) {
 		return coordThings.shiftLatLngMetric(refLL, shift)
 	})
 }
+coordThings.isPointInPoly = function(pt, verts) {
+	var theta = 0
 
+	var v1 = coordThings.delta(verts[verts.length - 1].dx - pt.dx, verts[verts.length - 1].dy - pt.dy)
+	var v2 = coordThings.delta(verts[0].dx - pt.dx, verts[0].dy - pt.dy)
+	var sgn = (v1.dx * v2.dy - v1.dy * v2.dx > 0 ? 1 : -1)
+	var lenLen = (v1.dx * v1.dx + v1.dy * v1.dy) * (v2.dx * v2.dx + v2.dy * v2.dy)
 
+	if (lenLen == 0) {
+		return true
+	}
+
+	var dot = (lenLen > 0 ? (v1.dx * v2.dx + v1.dy * v2.dy) / Math.sqrt(lenLen) : 0)
+
+	if (dot < 1e-13 - 1) {
+		return true
+	}
+
+	theta += Math.acos(dot) * sgn
+
+	for (var i = 1; i < verts.length; i++) {
+		v1 = coordThings.delta(verts[i-1].dx - pt.dx, verts[i-1].dy - pt.dy)
+		v2 = coordThings.delta(verts[i].dx - pt.dx, verts[i].dy - pt.dy)
+		sgn = (v1.dx * v2.dy - v1.dy * v2.dx > 0 ? 1 : -1)
+		lenLen = (v1.dx * v1.dx + v1.dy * v1.dy) * (v2.dx * v2.dx + v2.dy * v2.dy)
+
+		if (lenLen == 0) {
+			return true
+		}
+
+		dot = (lenLen > 0 ? (v1.dx * v2.dx + v1.dy * v2.dy) / Math.sqrt(lenLen) : 0)
+
+		if (dot < 1e-12 - 1) {
+			return true
+		}
+
+		theta += Math.acos(dot) * sgn 
+	}
+
+	return (theta > 1e-10 ? true : false)
+}
+
+{
+	var vvvv = [coordThings.delta(0,0), coordThings.delta(2,0), coordThings.delta(0.5,0.5), coordThings.delta(0,2)]
+	var pt_in = coordThings.delta(0.25, 0.25)
+	var pt_out1 = coordThings.delta(1, 1);
+	var pt_out2 = coordThings.delta(1, -1);
+	var pt_just_in = coordThings.delta(0, 0);
+	var pt_just_out = coordThings.delta(-1e-10, -1e-10);
+	tests.assertEqual("In", coordThings.isPointInPoly(pt_in, vvvv), true)
+	tests.assertEqual("Out 1", coordThings.isPointInPoly(pt_out1, vvvv), false)
+	tests.assertEqual("Out 2", coordThings.isPointInPoly(pt_out2, vvvv), false)
+	tests.assertEqual("Just In", coordThings.isPointInPoly(pt_just_in, vvvv), true)
+	tests.assertEqual("Just Out", coordThings.isPointInPoly(pt_just_out, vvvv), false)
+}
 
 // Make Ship
 var shipFactory = {}
@@ -75,12 +186,14 @@ shipFactory.makeShipDims = function(length, breadth, fwd) {
 }
 
 shipFactory.makeShipVerts = function(dims) {
-	return [	{dx:dims.length/2.0 + dims.fwd, dy:0},
+	return [
+				{dx:dims.length/2.0 + dims.fwd, dy:0},
 				{dx:dims.length/2.0, dy:dims.breadth/2.0},
 				{dx:-dims.length/2.0, dy:dims.breadth/2.0},
 				{dx:dims.fwd-dims.length/2.0, dy:0},
 				{dx:-dims.length/2.0, dy:-dims.breadth/2.0},
-				{dx:dims.length/2.0, dy:-dims.breadth/2.0}
+				{dx:dims.length/2.0, dy:-dims.breadth/2.0},
+				// Not Closed
 				]
 }
 
@@ -136,7 +249,7 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+8*dtc))*(coordThings.cosDeg(-fwd_angle+8*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+8*dtc))*(-coordThings.sinDeg(-fwd_angle+8*dto)),
 					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+8*dtc))*(coordThings.sinDeg(-fwd_angle+8*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+8*dtc))*(coordThings.cosDeg(-fwd_angle+8*dto))
 				},
-
+				// Not closed
 				]
 }
 
@@ -154,9 +267,12 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.v = v
 	ship.theta = theta
 	ship.shipVerts = shipFactory.makeShipVerts(dims)
+
 	ship.safetyRadius = 0
 	ship.fwdDistance = 0
 	ship.fwdAngle = 0
+	ship.domainVerts = null
+
 	ship._shipPoly = null
 	ship._shipDomainPoly = null
 	ship._map = null
@@ -179,9 +295,13 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		var path = coordThings.pathFromMetricDeltas(ship.basePosition, ship.v, ship.shipVerts, ship.theta)
 		return path
 	}
+	ship.updateDomainVerts = function() {
+		ship.domainVerts = shipFactory.makeShipDomainVerts(dims, ship.safetyRadius, ship.fwdDistance, ship.fwdAngle)
+	}
+	ship.updateDomainVerts()	
 	ship.makeDomainPath = function() {
-		var domainVerts = shipFactory.makeShipDomainVerts(dims, ship.safetyRadius, ship.fwdDistance, ship.fwdAngle)
-		var path = coordThings.pathFromMetricDeltas(ship.basePosition, ship.v, domainVerts, ship.theta)
+		ship.updateDomainVerts()
+		var path = coordThings.pathFromMetricDeltas(ship.basePosition, ship.v, ship.domainVerts, ship.theta)
 		return path
 	}
 	ship.makeShipPoly = function() {
@@ -266,6 +386,12 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	}
 	_shipPoly = ship.makeShipPoly()
 	_shipDomainPoly = ship.makeDomainPoly()
+
+	ship.getDomainBoundingBox = function() {
+		return coordThings.boundingBox(
+			ship.shipVerts.map(function(vv){return coordThings.shiftMetric(vv, ship.v)})
+			)
+	}
 
 	return ship
 }
