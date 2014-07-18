@@ -198,92 +198,107 @@ shipFactory.makeShipVerts = function(dims) {
 				]
 }
 
-shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fwd_angle) {
-	dtc = 90.0 / 4.0
-	dto = fwd_angle / 4.0
+shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fwd_angle, refinement_level) {
 
-	return [	
-				{dx: 0, dy: dims.breadth/2.0 + safety_radius},
-				
+	var DEFAULT_RESOLUTION = 5
 
-				// Parameterize here
-				{dx: 0.25 * -dims.length/2.0 , dy: dims.breadth/2.0 + safety_radius},
-				{dx: 0.5 * -dims.length/2.0, dy: dims.breadth/2.0 + safety_radius},
-				{dx: 0.75 * -dims.length/2.0, dy: dims.breadth/2.0 + safety_radius},
+	var R = (refinement_level ? refinement_level : DEFAULT_RESOLUTION)
 
-				// Parameterize here
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(90), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(90)},
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(112.5), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(112.5)},
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(135), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(135)},
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(157.5), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(157.5)},
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(180), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(180)},
+	var verts = []
 
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(180), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(180)},
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(202.5), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(202.5)},
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(225), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(225)},
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(247.5), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(247.5)},
-				{dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(270), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(270)},
+	// Top Mid
+	verts.push({dx: 0, dy: dims.breadth/2.0 + safety_radius})
 
-				// Parameterize here
-				{dx: 0.75 * -dims.length/2.0, dy: -dims.breadth/2.0 - safety_radius},
-				{dx: 0.5 * -dims.length/2.0, dy: -dims.breadth/2.0 - safety_radius},
-				{dx: 0.25 * -dims.length/2.0, dy: -dims.breadth/2.0 - safety_radius},
+	// Top Left Mid
+	// R = 5
+	for (var i = 1; i < R; i++) {
+		verts.push({dx: i*(1.0/R) * -dims.length/2.0, dy: dims.breadth/2.0 + safety_radius})
+	}
 
+	// Top Back
+	// R = 5
+	for (var i = 0; i <= R; i++) {
+		verts.push({dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(90 + i*(90.0/R)), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(90 + i*(90.0/R))})
+	}
 
-				{dx: 0, dy: -dims.breadth/2.0 - safety_radius},
+	// Back
+	// R = 5
+	for (var i = 1; i < R; i++) {
+		verts.push({dx: -dims.length/2.0 - safety_radius, dy: dims.breadth/2.0 - i*(1.0*dims.breadth/R)})
+	}
 
+	// Bottom Back
+	// R = 5
+	for (var i = 0; i <= R; i++) {
+		verts.push({dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(180 + i*(90.0/R)), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(180 + i*(90.0/R))})
+	}
 
-				// Interpololate here
-				{	dx: (dims.length/2+fwd_distance)*(coordThings.cosDeg(-fwd_angle)) + (-dims.breadth/2-safety_radius)*(-coordThings.sinDeg(-fwd_angle)),
-					dy: (dims.length/2+fwd_distance)*(coordThings.sinDeg(-fwd_angle)) + (-dims.breadth/2-safety_radius)*(coordThings.cosDeg(-fwd_angle))
-				},
+	// Bottom Left Mid
+	// R = 5
+	for (var i = 1; i < R; i++) {
+		verts.push({dx: (R-i)*(1.0/R) * -dims.length/2.0, dy: -dims.breadth/2.0 - safety_radius})
+	}
 
-
-
-				// Parameterize here (sharpen the nose)
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+0*dtc))*(coordThings.cosDeg(-fwd_angle+0*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+0*dtc))*(-coordThings.sinDeg(-fwd_angle+0*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+0*dtc))*(coordThings.sinDeg(-fwd_angle+0*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+0*dtc))*(coordThings.cosDeg(-fwd_angle+0*dto))
-				},
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+1*dtc))*(coordThings.cosDeg(-fwd_angle+1*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+1*dtc))*(-coordThings.sinDeg(-fwd_angle+1*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+1*dtc))*(coordThings.sinDeg(-fwd_angle+1*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+1*dtc))*(coordThings.cosDeg(-fwd_angle+1*dto))
-				},
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+2*dtc))*(coordThings.cosDeg(-fwd_angle+2*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+2*dtc))*(-coordThings.sinDeg(-fwd_angle+2*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+2*dtc))*(coordThings.sinDeg(-fwd_angle+2*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+2*dtc))*(coordThings.cosDeg(-fwd_angle+2*dto))
-				},
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+3*dtc))*(coordThings.cosDeg(-fwd_angle+3*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+3*dtc))*(-coordThings.sinDeg(-fwd_angle+3*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+3*dtc))*(coordThings.sinDeg(-fwd_angle+3*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+3*dtc))*(coordThings.cosDeg(-fwd_angle+3*dto))
-				},
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+4*dtc))*(coordThings.cosDeg(-fwd_angle+4*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+4*dtc))*(-coordThings.sinDeg(-fwd_angle+4*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+4*dtc))*(coordThings.sinDeg(-fwd_angle+4*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+4*dtc))*(coordThings.cosDeg(-fwd_angle+4*dto))
-				},
-
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+4*dtc))*(coordThings.cosDeg(-fwd_angle+4*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+4*dtc))*(-coordThings.sinDeg(-fwd_angle+4*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+4*dtc))*(coordThings.sinDeg(-fwd_angle+4*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+4*dtc))*(coordThings.cosDeg(-fwd_angle+4*dto))
-				},
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+5*dtc))*(coordThings.cosDeg(-fwd_angle+5*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+5*dtc))*(-coordThings.sinDeg(-fwd_angle+5*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+5*dtc))*(coordThings.sinDeg(-fwd_angle+5*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+5*dtc))*(coordThings.cosDeg(-fwd_angle+5*dto))
-				},
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+6*dtc))*(coordThings.cosDeg(-fwd_angle+6*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+6*dtc))*(-coordThings.sinDeg(-fwd_angle+6*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+6*dtc))*(coordThings.sinDeg(-fwd_angle+6*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+6*dtc))*(coordThings.cosDeg(-fwd_angle+6*dto))
-				},
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+7*dtc))*(coordThings.cosDeg(-fwd_angle+7*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+7*dtc))*(-coordThings.sinDeg(-fwd_angle+7*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+7*dtc))*(coordThings.sinDeg(-fwd_angle+7*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+7*dtc))*(coordThings.cosDeg(-fwd_angle+7*dto))
-				},
-				{	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+8*dtc))*(coordThings.cosDeg(-fwd_angle+8*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+8*dtc))*(-coordThings.sinDeg(-fwd_angle+8*dto)),
-					dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+8*dtc))*(coordThings.sinDeg(-fwd_angle+8*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+8*dtc))*(coordThings.cosDeg(-fwd_angle+8*dto))
-				},
+	// Bottom Mid
+	verts.push({dx: 0, dy: -dims.breadth/2.0 - safety_radius})
 
 
+	// Bottom Mid to Lower Front Arc
+	// R = 5
+	for (var i = 1; i < R; i++) {
+		verts.push({
+					dx: i * ((dims.length/2+fwd_distance)*(coordThings.cosDeg(-fwd_angle)) + (-dims.breadth/2-safety_radius)*(-coordThings.sinDeg(-fwd_angle))) / R,
+					dy: -dims.breadth/2.0 - safety_radius + 
+						i * (1.0/R)*(((dims.length/2+fwd_distance)*(coordThings.sinDeg(-fwd_angle)) + (-dims.breadth/2-safety_radius)*(coordThings.cosDeg(-fwd_angle))) - (-dims.breadth/2.0 - safety_radius))
+					})
+	}
 
-				// Interpololate here
-				{	dx: (dims.length/2+fwd_distance)*(coordThings.cosDeg(fwd_angle)) + (dims.breadth/2+safety_radius)*(-coordThings.sinDeg(fwd_angle)),
-					dy: (dims.length/2+fwd_distance)*(coordThings.sinDeg(fwd_angle)) + (dims.breadth/2+safety_radius)*(coordThings.cosDeg(fwd_angle))
-				},
+
+	// Lower Front Arc
+	// R = 5
+	var dtc = 90.0 / R
+	var dto = 1.0 * fwd_angle / R
+	for (var i = 0; i <= R; i++) {
+		verts.push({	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(-coordThings.sinDeg(-fwd_angle+i*dto))
+							+ fwd_distance * coordThings.sinDeg(i * (90.0 / R)) * coordThings.sinDeg(i * (90.0 / R)),
+						dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.sinDeg(-fwd_angle+i*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto))
+					})
+	}
+
+	// Front
+	// R = 5
+	for (var i = 1; i < R; i++) {
+		verts.push({	dx: dims.length/2 + fwd_distance + safety_radius + fwd_distance,
+						dy: (-dims.breadth/2) + i * (1.0 * dims.breadth / R)
+					})
+	}
+
+	// Top Front Arc
+	// R = 5
+	var dtc = 90.0 / R
+	var dto = 1.0 * fwd_angle / R
+	for (var i = R; i <= 2*R; i++) {
+		verts.push({	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(-coordThings.sinDeg(-fwd_angle+i*dto))
+							+ fwd_distance * coordThings.sinDeg(i * (90.0 / R)) * coordThings.sinDeg(i * (90.0 / R)),
+						dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.sinDeg(-fwd_angle+i*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto))
+					})
+	}
 
 
+	// Top Front Arc to Top Mid
+	// R = 5
+	for (var i = 1; i < R; i++) {
+		verts.push({
+					dx: (R-i) * ((dims.length/2+fwd_distance)*(coordThings.cosDeg(fwd_angle)) + (dims.breadth/2+safety_radius)*(-coordThings.sinDeg(fwd_angle))) / R,
+					dy: (dims.length/2+fwd_distance)*(coordThings.sinDeg(fwd_angle)) + (dims.breadth/2+safety_radius)*(coordThings.cosDeg(fwd_angle)) +
+						i * (1.0/R) * ((dims.breadth/2.0 + safety_radius) - ((dims.length/2+fwd_distance)*(coordThings.sinDeg(fwd_angle)) + (dims.breadth/2+safety_radius)*(coordThings.cosDeg(fwd_angle))))
+					})
+	}
 
-				{dx: 0, dy: dims.breadth/2.0 + safety_radius}
-				]
+	// Top Mid
+	verts.push({dx: 0, dy: dims.breadth/2.0 + safety_radius})
+
+	return verts
 }
 
 shipFactory.makeShipPath = function(dims, angle, basePosition, dv) {
