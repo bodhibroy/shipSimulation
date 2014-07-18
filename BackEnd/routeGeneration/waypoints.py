@@ -25,10 +25,13 @@ def haversine(p1,p2):
     m = 6367 *1000 * c
     return m
 
-def generateWayPoints(startPoint, endPoint):
+def generateWayPoints(route):
     """
-    Generates a bunch of waypoints, given a particular set of startPoint and endPoint
+    Generates a bunch of waypoints, 
+    given a particular set of startPoint and endPoint
     """
+    startPoint=route[0]
+    endPoint=route[1]
     wayPoints={}
     wayPoints[0]=startPoint
     steps=int(round(haversine(startPoint,endPoint)))+1
@@ -47,5 +50,6 @@ def generateWayPoints(startPoint, endPoint):
 if __name__ == "__main__":
     startPoint=[1.220290, 103.782423]
     endPoint=[1.268987, 103.795062]
-    print generateWayPoints(startPoint,endPoint)
+    route=[startPoint,endPoint]
+    print generateWayPoints(route)
 
