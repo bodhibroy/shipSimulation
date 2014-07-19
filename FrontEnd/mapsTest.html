@@ -53,6 +53,8 @@ function floatABoat(length) {
 	ship.setShipPolyOptions(shipCol, shipCol, 0.8, 0.3)
 	ship.setShipDomainPolyOptions(domainCol, domainCol, 0.3, 0.1)
 
+	ship.setMouseOverListener(function(){ console.log(ship._dims) })
+
 	pos = coordThings.delta(Math.random()*1000 - 500, -100 - Math.random()*1000)
 	angle = Math.random()*360
 	speed = Math.sqrt(200.0 / ship._dims.length) * 2
