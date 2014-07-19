@@ -10,6 +10,14 @@ typeColors['High Speed Craft'] = {fill: '#FFFF00', stroke: '#000000'}
 typeColors['Tugs/Pilots'] = {fill: '#00BFFF', stroke: '#000000'}
 typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
 
+var shipDimensions = []
+shipDimensions['Cargo'] = {length: 100, breadth: 30}
+shipDimensions['Tanker'] = {length: 100, breadth: 30}
+shipDimensions['Passenger'] = {length: 100, breadth: 30}
+shipDimensions['High Speed Craft'] = {length: 100, breadth: 30}
+shipDimensions['Tugs/Pilots'] = {length: 100, breadth: 30}
+shipDimensions['Yacht'] = {length: 100, breadth: 30}
+
 
 function checkForViolations() {
 	for (var i = 0; i < ships.length; i++) {
@@ -37,7 +45,7 @@ function checkForViolations() {
 }
 
 function startSimulation() {
-	
+
 	for (var i = 0; i < ships.length; i++) {
 		var myTypeColor = typeColors[ships[i].shipType]
 		ships[i].setShipPolyOptions(myTypeColor.stroke, myTypeColor.fill, 0.8, 0.6);
