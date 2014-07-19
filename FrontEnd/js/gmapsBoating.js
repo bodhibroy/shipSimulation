@@ -83,25 +83,25 @@ var coordThings = {
 	},
 	
 	sinDeg : function(angle) {
-		theta = Math.PI * angle / 180.0
+		var theta = Math.PI * angle / 180.0
 		return Math.sin(theta)
 	},
 	
 	cosDeg : function(angle) {
-		theta = Math.PI * angle / 180.0
+		var theta = Math.PI * angle / 180.0
 		return Math.cos(theta)
 	},
 	
 	makeVector : function(angle, M) {
-		theta = Math.PI * angle / 180.0
+		var theta = Math.PI * angle / 180.0
 		return {dx: M * Math.cos(theta), dy: M * Math.sin(theta)}
 	},	
 
 	rotate : function(pt, angle) {
-		theta = Math.PI * angle / 180.0
-		ct = Math.cos(theta)
-		st = Math.sin(theta)
-		pt2 = {dx: pt.dx * ct - pt.dy * st, dy: pt.dy * ct + pt.dx * st}
+		var theta = Math.PI * angle / 180.0
+		var ct = Math.cos(theta)
+		var st = Math.sin(theta)
+		var pt2 = {dx: pt.dx * ct - pt.dy * st, dy: pt.dy * ct + pt.dx * st}
 		return pt2
 	},
 	
@@ -124,7 +124,7 @@ var coordThings = {
 	},
 
 	boundingBox : function(verts) {
-		bb = {}
+		var bb = {}
 		bb.x_min = verts.reduce(misc.reduceFunctionMinX, Infinity)
 		bb.x_max = verts.reduce(misc.reduceFunctionMaxX, -Infinity)
 		bb.y_min = verts.reduce(misc.reduceFunctionMinY, Infinity)
@@ -152,11 +152,11 @@ var coordThings = {
 
 }
 coordThings.shiftLatLngMetric = function(ll, dv) {
-	dll = coordThings.metresToDeg(dv)
+	var dll = coordThings.metresToDeg(dv)
 	return {dlat: ll.lat() + dll.dlat, dlng: ll.lng() + dll.dlng}
 }
 coordThings.shiftLatLngMetricGoogle = function(ll, dv) {
-	dll = coordThings.metresToDeg(dv)
+	var dll = coordThings.metresToDeg(dv)
 	return new google.maps.LatLng(ll.lat() + dll.dlat, ll.lng() + dll.dlng)
 }
 coordThings.pathFromMetricDeltas = function(refLL, dv, verts, angle) {
@@ -210,7 +210,7 @@ coordThings.isPointInPoly = function(pt, verts) {
 		theta += Math.acos(dot) * sgn 
 	}
 
-	return (theta > 1e-10 ? true : false)
+	return (Math.abs(theta) > 1e-10 ? true : false)
 }
 coordThings.approxPolyMembership = function(vertsBase, verts) {
 	for (var i = 0; i < verts.length; i++) {
@@ -282,10 +282,10 @@ shipFactory.makeShipVertsStopped = function(dims) {
 
 shipFactory.makeShipDomainVerts = function(dims, _safety_radius, _fwd_distance, _fwd_angle, _bwd_distance, refinement_level) {
 
-	safety_radius = _safety_radius ? _safety_radius : dims.length / 3.0
-	fwd_distance = _fwd_distance ? _fwd_distance : 4 * dims.length / 3.0
-	fwd_angle = _fwd_angle ? _fwd_angle : 5
-	bwd_distance = _bwd_distance ? _bwd_distance : dims.length / 6.0
+	var safety_radius = _safety_radius ? _safety_radius : dims.length / 3.0
+	var fwd_distance = _fwd_distance ? _fwd_distance : 4 * dims.length / 3.0
+	var fwd_angle = _fwd_angle ? _fwd_angle : 5
+	var bwd_distance = _bwd_distance ? _bwd_distance : dims.length / 6.0
 
 	var DEFAULT_RESOLUTION = 5
 	var R = (refinement_level ? refinement_level : DEFAULT_RESOLUTION)
@@ -483,7 +483,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 
 	ship.makeShipPoly = function() {
 		var path = ship.makeShipPath()
-		poly = new google.maps.Polygon({
+		var poly = new google.maps.Polygon({
 			path: path,
 			strokeColor: '#00ff00',
 			strokeOpacity: 0.8,
@@ -524,7 +524,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.updateShipPoly = function() {
 		if (ship._shipPoly) {
 			var path = ship.makeShipPath()
-			vertices = ship._shipPoly.getPath()
+			var vertices = ship._shipPoly.getPath()
 			for (var i = 0; i < vertices.getLength(); i++) {
 		    	vertices.setAt(i, path[i])
 			}
@@ -532,7 +532,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	}
 	ship.makeDomainPoly = function() {
 		var path = ship.makeDomainPath()
-		poly = new google.maps.Polygon({
+		var poly = new google.maps.Polygon({
 			path: path,
 			strokeColor: '#ff0000',
 			strokeOpacity: 0.1,
@@ -546,7 +546,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.updateDomainPoly = function() {
 		if (ship._shipDomainPoly) {
 			var path = ship.makeDomainPath()
-			vertices = ship._shipDomainPoly.getPath()
+			var vertices = ship._shipDomainPoly.getPath()
 			for (var i = 0; i < vertices.getLength(); i++) {
 			    vertices.setAt(i, path[i])
 			}
@@ -572,7 +572,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	_shipPoly = ship.makeShipPoly()
 
 	ship.latLonOfDomainVerticesAndBoundingBox = function() {
-		ret = {}
+		var ret = {}
 		ret.verts = ship.domainVerts.map(function(vv){
 						return coordThings.flatEarthConversionLLtoMetric(
 							coordThings.shiftLatLngMetric(
@@ -585,8 +585,8 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	}
 
 	ship.checkForDomainIntersection = function(otherShip) {
-		ship1Stuff = ship.latLonOfDomainVerticesAndBoundingBox()
-		ship2Stuff = otherShip.latLonOfDomainVerticesAndBoundingBox()
+		var ship1Stuff = ship.latLonOfDomainVerticesAndBoundingBox()
+		var ship2Stuff = otherShip.latLonOfDomainVerticesAndBoundingBox()
 
 		if (ship1Stuff.flatEarthBB.x_min > ship2Stuff.flatEarthBB.x_max) {
 			return false
