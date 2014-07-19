@@ -20,6 +20,50 @@ function getShipName(){
 }
 
 
+var shipTypes = ['Cargo', 'Tanker', 'Passenger', 'High Speed Craft', 'Tugs/Pilots', 'Yacht']
+var typeColors = []
+typeColors['Cargo'] = {fill: '#01DF3A', stroke: '#000000'}
+typeColors['Tanker'] = {fill: '#FF0000', stroke: '#000000'}
+typeColors['Passenger'] = {fill: '#0101DF', stroke: '#000000'}
+typeColors['High Speed Craft'] = {fill: '#FFFF00', stroke: '#000000'}
+typeColors['Tugs/Pilots'] = {fill: '#00BFFF', stroke: '#000000'}
+typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
+
+
+function checkForViolations() {
+	for (var i = 0; i < ships.length; i++) {
+		ships[i].setShipDomainPolyOptions('#000000', '#ff0000', 0.4, 0.2);
+	}
+
+	pairs = domainViolationService.check(ships)
+
+	document.getElementById('10min').innerHTML = ''
+	for (var i = 0; i < pairs.length; i++) {
+		console.log(pairs[i]);
+		console.log(pairs[i][0]._shipId, pairs[i][1]._shipId);
+		// pairs[i][0].setShipPolyOptions('#000000', '#ff0000', 1, 0.7);
+		// pairs[i][1].setShipPolyOptions('#000000', '#ff0000', 1, 0.7);
+		pairs[i][0].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7);
+		pairs[i][1].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7);
+		var li=document.createElement('li');
+		li.innerHTML=violatingPairs[i][0]._shipId + " " + violatingPairs[i][1]._shipId.toString();
+		li.onclick = function() {
+				map.panTo(coordThings.shiftLatLngMetricGoogle(pairs[i][0].basePosition, pairs[i][0].v))
+			}
+		document.getElementById('10min').appendChild(li);
+	}
+	console.log(pairs);
+}
+
+function startSimulation() {
+	
+	for (var i = 0; i < ships.length; i++) {
+		var myTypeColor = typeColors[ships[i].shipType]
+		ships[i].setShipPolyOptions(myTypeColor.stroke, myTypeColor.fill, 0.8, 0.6);
+		ships[i].setShipDomainPolyOptions('#000000', '#ff0000', 0.4, 0.2);
+	}
+}
+
 function initialize() {
 	mapDiv = document.getElementById('map-canvas');
 
@@ -38,11 +82,15 @@ function initialize() {
 		*/
 	});
 	//map.setTilt(45);
-}
-
-google.maps.event.addDomListener(window, 'load', initialize);
 
 
+	var infoWindow = new google.maps.InfoWindow({
+		position: jumboEastCoast,
+		content: 'Click to Start...'
+	});
+	infoWindow.open(map);
+
+<<<<<<< HEAD
 function checkForViolations(){
 	pairs = domainViolationService.check(ships);
 	for (var i = 0; i < pairs.length; i++) {
@@ -68,3 +116,15 @@ function getHeading(){
 }
 
 
+=======
+	var startClickListener = null
+	startClickListener = google.maps.event.addListener(map, 'click', function(event) {
+		infoWindow.close();
+		google.maps.event.removeListener(startClickListener)
+
+		startSimulation()
+	});
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+>>>>>>> 530d9d517c8dc3ad4674c099e4118df0e3260233
