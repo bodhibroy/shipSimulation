@@ -1,18 +1,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title>Google Maps V3 API Sample</title>
-<!-- 
+	<title>AIBS</title>
+
 	<style>
-		table {
-		table-layout:fixed;
-		}
-		table td {
-			width: 20%;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
- -->
+		.text{
+			font-size: 25px;
+		}		
+		.getSomeSpace{
+			padding-left: 50px;
+			width:100px;
+		}		
+
 	</style>
 	
 	<script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
@@ -134,57 +133,108 @@ google.maps.event.addDomListener(window, 'load', initialize);
 </head>
 
 <body>
+	<h1 style='text-align:center'>Domain Violation Detection: An <u>Incrementally</u> Better System</h1>
 	<div id="map-and-alerts" style="width: 100%; overflow: hidden;">
-		<div id="map-canvas" style="width: 81%; height: 95%; float:left; border: 2px solid; border-radius: 25px;"></div>
+		<div id="map-canvas" style="width: 81%; height: 80%; float:left; border: 2px solid; border-radius: 25px;"></div>
+		<div id='shipInfo' style='width:81%; float:left; border: 2px solid; border-radius: 25px;'>
+			<div style='width: 50%; float: left; overflow: hidden;'>
+				<table>
+					<tr>
+						<td class='getSomeSpace'>Ship Name<div id='sname' class='text'>blah</div></td>
+						<td class='getSomeSpace'>Cargo Type<div id='ctype' class='text'>blah</div></td>
+						<td class='getSomeSpace'>Location<div id='location' class='text'>blah</div></td>
+					</tr>
+				</table>
+			</div>
+			<div >
+				<table>
+					<tr>
+						<td>
+							<svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#01DF3A;stroke:#000000;stroke-width:2" transform="translate(5,5)"/> 
+							</svg>Cargo
+						</td>
+						<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FF0000;stroke:#000000;stroke-width:2" transform="translate(5,5)" /> 
+							</svg>Tanker</td>
+						<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#0101DF;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Passenger</td>
+						<td style='width:25%'><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FFFF00;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>High Speed Craft</td>
+							<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#00BFFF;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Tugs/Pilots</td>
+							<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#A4A4A4;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Yatch</td>
+					</tr>
+					
+				</table>
+			
+			</div>
+			
+		<!-- 
+	<div style='width:50%;'>
+				<table border="1">
+					<tr>
+						<td>
+							<svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#01DF3A;stroke:#000000;stroke-width:2" transform="translate(5,5)"/> 
+							</svg>Cargo
+						</td>
+						<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FF0000;stroke:#000000;stroke-width:2" transform="translate(5,5)" /> 
+							</svg>Tanker</td>
+						<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#0101DF;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Passenger</td>
+						<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FFFF00;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>High Speed Craft</td>
+							<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#00BFFF;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Tugs/Pilots</td>
+ -->
+						<!-- 	<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#A901DB;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Yatch</td>
+		
+						<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FF8000;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Fishing</td>
+						<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#A4A4A4;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Unidentified Ship</td>
+						<td><svg height="25" width="25">
+								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#071019;stroke:#FF0000;stroke-width:2"  transform="translate(5,5)"/> 
+							</svg>Naval</td>
+			 -->
+<!-- 
+
+					</tr>
+				</table>
+			</div>
+ -->
+		</div>
 		<div id = "alert" style="margin-left:82%; ">
-			<div id='alert' style="height: 58%; border: 2px solid; border-radius: 25px;">
+			<div id='alert' style="height: 54%; border: 2px solid; border-radius: 25px;">
 			<div style='text-align:center; font-size:24px;'>Collision Notifications</div>
 				<div id='10min' style='height: 29%; border:1px solid;'></div>
 				<div id='20min' style='height: 29%; border:1px solid;'></div>
 				<div id='30min' style='height: 29%; border:1px solid;'></div>
 			</div>
 			<div style="height:7px;"></div>
-			<div id='hotspots' style="height: 36%; border: 2px solid; border-radius: 25px;" >
+			<div id='hotspots' style="height: 30%; border: 2px solid; border-radius: 25px;" >
 			<div style='text-align:center; font-size:24px;'>HOTSPOTS</div>
 				<div style='border:1px solid;'>
 				</div>
 			</div>
-	</div>
-	<div id = "legend" style="width:100%,height:10%">
-	<table border="1">
-		<tr>
-			<td>
-				<svg height="25" width="25">
-   					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#01DF3A;stroke:#000000;stroke-width:2" transform="translate(5,5)"/> 
-				</svg>Cargo
-			</td>
-			<td><svg height="25" width="25">
-  					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FF0000;stroke:#000000;stroke-width:2" transform="translate(5,5)" /> 
-				</svg>Tanker</td>
-			<td><svg height="25" width="25">
-  					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#0101DF;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-				</svg>Passenger</td>
-			<td><svg height="25" width="25">
-  					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FFFF00;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-				</svg>High Speed Craft</td>
-			<td><svg height="25" width="25">
-  					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#00BFFF;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-				</svg>Tugs/Pilots</td>
-			<td><svg height="25" width="25">
-  					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#A901DB;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-				</svg>Yatch</td>
-			<td><svg height="25" width="25">
-  					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FF8000;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-				</svg>Fishing</td>
-			<td><svg height="25" width="25">
-  					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#A4A4A4;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-				</svg>Unidentified Ship</td>
-			<td><svg height="25" width="25">
-  					<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#071019;stroke:#FF0000;stroke-width:2"  transform="translate(5,5)"/> 
-				</svg>Naval</td>
+		</div>
 
-		</tr>
-	</table>
+<!-- 	<div id = "legend" style="width:100%,height:10%"> -->
+
 	</div>
 	
 </body>
