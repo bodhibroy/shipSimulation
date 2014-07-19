@@ -221,7 +221,7 @@ coordThings.approxPolyMembership = function(vertsBase, verts) {
 	return false
 }
 coordThings.approxPolyIntersection = function(verts1, verts2) {
-	return coordThings.approxPolyMembership(verts1, verts2) && coordThings.approxPolyMembership(verts2, verts1)
+	return coordThings.approxPolyMembership(verts1, verts2) || coordThings.approxPolyMembership(verts2, verts1)
 }
 
 if (false)
