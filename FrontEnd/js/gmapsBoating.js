@@ -361,8 +361,8 @@ shipFactory.makeShipDomainVerts = function(dims, _safety_radius, _fwd_distance, 
 
 	// Top Front Arc
 	// R = 5
-	var dtc = 90.0 / R
-	var dto = 1.0 * fwd_angle / R
+	// dtc = 90.0 / R
+	// dto = 1.0 * fwd_angle / R
 	for (var i = R; i <= 2*R; i++) {
 		verts.push({	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(-coordThings.sinDeg(-fwd_angle+i*dto))
 							,//+ fwd_distance * coordThings.sinDeg(i * (90.0 / R)) * coordThings.sinDeg(i * (90.0 / R)),
@@ -410,6 +410,11 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.v = v
 	ship.theta = theta
 	ship.shipVerts = shipFactory.makeShipVerts(dims)
+
+	ship.shipType = 'others'
+	ship.setShipType = function(shipType) {
+		ship.shipType = shipType
+	}
 
 	ship.safetyRadius = 0
 	ship.fwdDistance = 0
