@@ -88,40 +88,86 @@ function floatAStationaryBoat(length, v, angle, safety_radius, fwd_distance, fwd
 	return ship
 }
 
+
+
+// ********** USE THIS ****************
 var ships = []
+var shipIdToIdx = []
+var idxToShipId = []
 
-function initialize() {
-	mapDiv = document.getElementById('map-canvas');
-	
-	map = new google.maps.Map(mapDiv, {
-		center: jumboEastCoast,
-		zoom: 15,
-		//mapTypeID: google.maps.MapTypeId.TERRAIN
-		//mapTypeID: google.maps.MapTypeId.SATELLITE
-		// mapTypeId: google.maps.MapTypeId.ROADMAP
-		//mapTypeId: google.maps.MapTypeId.HYBRID
-		/*
-		MapTypeId.ROADMAP displays the default road map view. This is the default map type.
-		MapTypeId.SATELLITE displays Google Earth satellite images
-		MapTypeId.HYBRID displays a mixture of normal and satellite views
-		MapTypeId.TERRAIN displays a physical map based on terrain information.
-		*/
-	});
-	//map.setTilt(45);
-	var infoWindow = new google.maps.InfoWindow({
-		position: jumboEastCoast,
-		content: 'Jumbo Seafood East Coast'
-	});
-	infoWindow.open(map);	
-	window.setTimeout(function(){
-		infoWindow.close();
-	}, 1000 )
+var T = 0;
+var k = 0;
+var TIME_STEP_IN_MS = 50;
+function driftForwardInTime() {
+	if (T % 1000 == 0) {
+		// ********* READ DATA FOR NEXT TIME STEP *********
+		dataAtStep[k].forEach(function(row) {
+			if(typeof shipIdToIdx[row.shipID] == 'undefined') {
+				// Ship not present. Add.
 
+				var breadth = max(row.vslBre_q, Math.pow(row.vslLen_q,2.0/3.0)+1)
+				var ship_dimensions = shipFactory.makeShipDims(row.vslLen_q, breadth, row.vslLen_q/20.0)
+				var ship_location = new google.maps.LatLng(row.vslTrgtPosnLat_q, row.vslTrgtPosnLong_q)
+
+				var ship = shipFactory.makeEZShip(ship_dimensions, ship_location)
+				ship.just_created = true
+
+				ship.velocity_in_metres = row.SHIP_VELOCITY
+
+				ships.push(ship)
+				shipIdToIdx[shipID] = ships.length
+				idxToShipId.push(shipID)
+			}
+			else 
+			{
+				// Update position and velocity
+				var ship = ships[shipIdToIdx[row.shipID]]
+
+				var ship_location = new google.maps.LatLng(row.vslTrgtPosnLat_q, row.vslTrgtPosnLong_q)
+				ship.updatePosition(coordThings.delta(0,0), row.vslCourse_q, ship_location)
+
+				ship.velocity_in_metres = row.SHIP_VELOCITY
+			}
+		})
+
+		k += 1
+	}
+
+
+	// Update Positions
+	ships.forEach(function(thisShip) {
+		if (thisShip.just_created) {
+			thisShip.just_created = false
+		} else {
+			var new_v = shiftMetricfunction(thisShip.v,
+					coordThings.delta((TIME_STEP_IN_MS/1000) * thisShip.velocity_in_metres*cos(vslCourse_q), (TIME_STEP_IN_MS/1000) * thisShip.velocity_in_metres*sin(vslCourse_q)))
+			thisShip.updatePosition(new_v, thisShip.theta)
+		}
+	})
+
+
+	// Update Domains
+	ships.forEach(function(thisShip) {
+		thisShip.updateDomainParams(thisShip.safetyRadius,		// 2 * ship._dims.breadth
+									fwd_distance,			// length * (2.5 - Math.exp(- (v_knots / 10.0) * (vslGT_q / 50000.0)))
+									fwd_angle,				// 15 * Math.exp(- v_knots / 10.0)
+									bwd_distance)			// 0.2 * ship._dims.length
+	}
+
+	// Test for domain violations
+
+	T += TIME_STEP_IN_MS
+}
+// ********** USE THIS ****************
+
+
+
+
+function createShips() {
 	var lengths = [50, 100, 150, 200, 50, 100, 150, 200]
 	lengths.forEach(function(length) {
 		ships.push(floatABoat(length))
 	} )
-
 
 	//floatAround = false;
 	var shift_x = 650
@@ -152,17 +198,56 @@ function initialize() {
 
 	console.log( domainViolationService.check([ship1, ship2, ship3]) )
 	*/
+}
 
+function initialize() {
+	mapDiv = document.getElementById('map-canvas');
+	
+	map = new google.maps.Map(mapDiv, {
+		center: jumboEastCoast,
+		zoom: 15,
+		//mapTypeID: google.maps.MapTypeId.TERRAIN
+		//mapTypeID: google.maps.MapTypeId.SATELLITE
+		// mapTypeId: google.maps.MapTypeId.ROADMAP
+		//mapTypeId: google.maps.MapTypeId.HYBRID
+		/*
+		MapTypeId.ROADMAP displays the default road map view. This is the default map type.
+		MapTypeId.SATELLITE displays Google Earth satellite images
+		MapTypeId.HYBRID displays a mixture of normal and satellite views
+		MapTypeId.TERRAIN displays a physical map based on terrain information.
+		*/
+	});
+	//map.setTilt(45);
+
+
+	// ********** USE THIS ****************
+	var infoWindow = new google.maps.InfoWindow({
+		position: jumboEastCoast,
+		content: 'Click to Start...'
+	});
+	infoWindow.open(map);
+
+	var startClickListener;
+	startClickListener = google.maps.event.addListener(map, 'click', function(event) {
+		infoWindow.close();
+		google.maps.event.removeListener(startClickListener)
+
+		createShips() // ******** SWAP FOR STEP FORWARD IN TIME AND READ NEXT BATCH
+	});
+	// ********** USE THIS ****************
+
+	/*
 	pairs = domainViolationService.check(ships)
 	for (var i = 0; i < pairs.length; i++) {
 		console.log(pairs[i])
 		console.log(pairs[i][0]._shipId, pairs[i][1]._shipId)
 		pairs[i][0].setShipPolyOptions('#000000', '#ff0000', 1, 0.7)
 		pairs[i][1].setShipPolyOptions('#000000', '#ff0000', 1, 0.7)
-		pairs[i][0].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7)
-		pairs[i][1].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7)
+		pairs[i][0].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.8)
+		pairs[i][1].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.8)
 	}
 	console.log( pairs )
+	*/
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
