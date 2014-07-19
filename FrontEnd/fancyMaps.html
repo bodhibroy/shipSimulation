@@ -15,128 +15,8 @@
 	</style>
 	
 	<script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
-
 	<script type="text/javascript" src="js/gmapsBoating.js"></script>
-
-	<script type="text/javascript">
-	var map;
-	var mapDiv;
-	var jumboEastCoast = new google.maps.LatLng(1.305189, 103.930657);
-	var floatAround = true
-
-
-	function driftPoly(ship, dv, angle, speed) {
-		var newSpeed = Math.max(0, speed + Math.sqrt(200.0 / ship._dims.length) * (Math.random() - 0.5) * 0.1)
-		var newAngle = (angle + Math.random() - 0.55) % 360	
-		var newDv = coordThings.shiftMetric(dv, coordThings.makeVector(angle, newSpeed))
-		ship.updatePosition(newDv, newAngle)
-		ship.updateDomainParams(	ship.safetyRadius, 
-									speed * 3 + ship._dims.fwd,
-									Math.min(45, 25.0 / speed)
-									)
-
-		if (floatAround) {
-			window.setTimeout(function(){driftPoly(ship, newDv, newAngle, newSpeed)}, 20)
-		}
-	}
-
-	function floatABoat(length) {
-		var ship = shipFactory.makeEZShip(shipFactory.makeShipDims(length, Math.pow(length,2.0/3.0)+1, length/20.0), jumboEastCoast)
-		ship.updateDomainParams(length / 4.0, length / 8.0, 10)
-		ship.placeOnMap(map)
-
-		var shipCol = misc.rgbToHex(Math.round(Math.random()*255), Math.round(Math.random()*255), Math.round(Math.random()*255))
-		var domainCol = misc.rgbToHex(Math.round(Math.random()*255), Math.round(Math.random()*255), Math.round(Math.random()*255))
-		ship.setShipPolyOptions(shipCol, shipCol, 0.8, 0.3)
-		ship.setShipDomainPolyOptions(domainCol, domainCol, 0.3, 0.1)
-
-		pos = coordThings.delta(Math.random()*1000 - 500, -100 - Math.random()*1000)
-		angle = Math.random()*360
-		speed = Math.sqrt(200.0 / ship._dims.length) * 2
-		driftPoly(ship, pos, angle, speed)
-		return ship
-	}
-
-	function floatAStationaryBoat(length, v, angle, safety_radius, fwd_distance, fwd_angle, RGB) {
-		var ship = shipFactory.makeEZShip(shipFactory.makeShipDims(length, Math.pow(length,2.0/3.0)+1, length/20.0), jumboEastCoast)
-		ship.updatePosition(v, angle)
-		ship.updateDomainParams(safety_radius, fwd_distance, fwd_angle)
-		ship.placeOnMap(map)
-
-		var shipCol = misc.rgbToHex(RGB.R, RGB.G, RGB.B)
-		var domainCol = misc.rgbToHex(255, 0, 0)
-		ship.setShipPolyOptions(shipCol, shipCol, 0.8, 0.3)
-		ship.setShipDomainPolyOptions(domainCol, domainCol, 0.3, 0.1)
-
-		return ship
-	}
-
-	var ships = []
-
-	function initialize() {
-		mapDiv = document.getElementById('map-canvas');
-	
-		map = new google.maps.Map(mapDiv, {
-			center: jumboEastCoast,
-			zoom: 15,
-			//mapTypeID: google.maps.MapTypeId.TERRAIN
-			//mapTypeID: google.maps.MapTypeId.SATELLITE
-			// mapTypeId: google.maps.MapTypeId.ROADMAP
-			//mapTypeId: google.maps.MapTypeId.HYBRID
-			/*
-			MapTypeId.ROADMAP displays the default road map view. This is the default map type.
-			MapTypeId.SATELLITE displays Google Earth satellite images
-			MapTypeId.HYBRID displays a mixture of normal and satellite views
-			MapTypeId.TERRAIN displays a physical map based on terrain information.
-			*/
-		});
-		//map.setTilt(45);
-		var infoWindow = new google.maps.InfoWindow({
-			position: jumboEastCoast,
-			content: 'Jumbo Seafood East Coast'
-		});
-		infoWindow.open(map);	
-		window.setTimeout(function(){
-			infoWindow.close();
-		}, 1000 )
-
-		var lengths = [50, 100, 150, 200, 50, 100, 150, 200]
-		lengths.forEach(function(length) {
-			ships.push(floatABoat(length))
-		} )
-
-
-		floatAround = false;
-		shift_x = 650
-		shift_y = -300
-		ships.push(floatAStationaryBoat(100, coordThings.delta(500 + shift_x, -1000 + shift_y), 0, 20, 20, 12.5, {R: 128, G: 0, B: 255}))
-		ships.push(floatAStationaryBoat(100, coordThings.delta(550 + shift_x, -900 + shift_y), -8, 20, 10, 20, {R: 0, G: 0, B: 255}))
-		ships.push(floatAStationaryBoat(50, coordThings.delta(300 + shift_x, -950 + shift_y), 20, 10, 25, 10, {R: 0, G: 255, B: 0}))
-
-		shift_x2 = shift_x + 400
-		shift_y2 = shift_y + 200
-		ships.push(floatAStationaryBoat(100, coordThings.delta(500 + shift_x2, -1000 + shift_y2), 0, 30, 0, 0, {R: 128, G: 0, B: 255}))
-		ships.push(floatAStationaryBoat(100, coordThings.delta(550 + shift_x2, -900 + shift_y2), -8, 30, 0, 0, {R: 0, G: 0, B: 255}))
-		ships.push(floatAStationaryBoat(50, coordThings.delta(300 + shift_x2, -950 + shift_y2), 20, 20, 5, 0, {R: 0, G: 255, B: 0}))
-
-
-		ship1 = floatAStationaryBoat(100, coordThings.delta(700, -1500), 0, 30, 0, 0, {R: 128, G: 0, B: 255})
-		ship2 = floatAStationaryBoat(200, coordThings.delta(800, -1550), 20, 30, 20, 10, {R: 0, G: 0, B: 255})
-		//console.log(ship1.checkForDomainIntersection(ship2))
-
-		var violatingPairs=domainViolationService.check(ships);
-		for (var i=0;i<violatingPairs.length;i++){
-			console.log(violatingPairs[i][0]._shipId,violatingPairs[i][1]._shipId);
-			//document.getElementById('10min').innerHTML=violatingPairs[i][0]._shipId + " " + violatingPairs[i][1]._shipId.toString();
-			var li=document.createElement('li');
-			
-			li.innerHTML=violatingPairs[i][0]._shipId + " " + violatingPairs[i][1]._shipId.toString();
-			document.getElementById('10min').appendChild(li);
-		}
-	}
-
-	google.maps.event.addDomListener(window, 'load', initialize);
-</script>
+	<script type="text/javascript" src="js/dvdFront.js"></script>
 </head>
 
 <body>
@@ -182,48 +62,7 @@
 				</table>			
 			</div>
 			
-		<!-- 
-	<div style='width:50%;'>
-				<table border="1">
-					<tr>
-						<td>
-							<svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#01DF3A;stroke:#000000;stroke-width:2" transform="translate(5,5)"/> 
-							</svg>Cargo
-						</td>
-						<td><svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FF0000;stroke:#000000;stroke-width:2" transform="translate(5,5)" /> 
-							</svg>Tanker</td>
-						<td><svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#0101DF;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-							</svg>Passenger</td>
-						<td><svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FFFF00;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-							</svg>High Speed Craft</td>
-							<td><svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#00BFFF;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-							</svg>Tugs/Pilots</td>
- -->
-						<!-- 	<td><svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#A901DB;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-							</svg>Yatch</td>
-		
-						<td><svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#FF8000;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-							</svg>Fishing</td>
-						<td><svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#A4A4A4;stroke:#000000;stroke-width:2"  transform="translate(5,5)"/> 
-							</svg>Unidentified Ship</td>
-						<td><svg height="25" width="25">
-								<polygon points="0,5 5,0 10,5 10,20 5,15 0,20" style="fill:#071019;stroke:#FF0000;stroke-width:2"  transform="translate(5,5)"/> 
-							</svg>Naval</td>
-			 -->
-<!-- 
 
-					</tr>
-				</table>
-			</div>
- -->
 		</div>
 		<div id = "alert" style="margin-left:82%; ">
 			<div id='alert' style="height: 89%; border: 2px solid; border-radius: 25px;">
@@ -232,24 +71,8 @@
 					<ul id='10min'>
 					</ul>
 				</div>
-				<!-- 
-<div id='20min' style='height: 29%; border:1px solid;'>
-				</div>
-				<div id='30min' style='height: 29%; border:1px solid;'>
-				</div>
- -->
 			</div>
-			<!-- 
-<div style="height:7px;"></div>
-			<div id='hotspots' style="height: 35%; border: 2px solid; border-radius: 25px;" >
-			<div style='text-align:center; font-size:24px;'>HOTSPOTS</div>
-				<div style='border:1px solid;'>
-				</div>
-			</div>
- -->
 		</div>
-
-<!-- 	<div id = "legend" style="width:100%,height:10%"> -->
 
 	</div>
 	
