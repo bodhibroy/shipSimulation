@@ -581,7 +581,9 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		ret.verts = ship.domainVerts.map(function(vv){
 						return coordThings.flatEarthConversionLLtoMetric(
 							coordThings.shiftLatLngMetric(
-								ship.basePosition, coordThings.shiftMetric(vv, ship.v))
+								ship.basePosition, coordThings.shiftMetric(
+									coordThings.rotate(vv, ship.theta),
+									ship.v))
 							)
 						})
 		ret.flatEarthBB = coordThings.boundingBox(ret.verts)
