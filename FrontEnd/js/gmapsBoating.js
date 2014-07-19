@@ -7,6 +7,20 @@ misc.componentToHex = function(c) {
 misc.rgbToHex = function(r, g, b) {
     return "#" + misc.componentToHex(r) + misc.componentToHex(g) + misc.componentToHex(b);
 }
+
+misc.reduceFunctionMinLng = function(previousValue, currentValue, index, array) {
+	return Math.min(previousValue, currentValue.dlng)
+}
+misc.reduceFunctionMaxLng = function(previousValue, currentValue, index, array) {
+	return Math.max(previousValue, currentValue.dlng)
+}
+misc.reduceFunctionMinLat = function(previousValue, currentValue, index, array) {
+	return Math.min(previousValue, currentValue.dlat)
+}
+misc.reduceFunctionMaxLat = function(previousValue, currentValue, index, array) {
+	return Math.max(previousValue, currentValue.dlat)
+}
+
 misc.reduceFunctionMinX = function(previousValue, currentValue, index, array) {
 	return Math.min(previousValue, currentValue.dx)
 }
@@ -112,8 +126,29 @@ var coordThings = {
 		return bb
 	},
 
+	/*
+	boundingBoxLL : function(verts) {
+		bb = {}
+		bb.lng_min = verts.reduce(misc.reduceFunctionMinLng, Infinity)
+		bb.lng_max = verts.reduce(misc.reduceFunctionMaxLng, -Infinity)
+		bb.lat_min = verts.reduce(misc.reduceFunctionMinLat, Infinity)
+		bb.lat_max = verts.reduce(misc.reduceFunctionMaxLat, -Infinity)
+
+		return bb
+	},
+	*/
+
+	flatEarthConversionLLtoMetric: function(ll) {
+		var metresPerDeg = 111319.9
+		return {dx: metresPerDeg * ll.dlng, dy: metresPerDeg * ll.dlat}
+	}
+
 }
 coordThings.shiftLatLngMetric = function(ll, dv) {
+	dll = coordThings.metresToDeg(dv)
+	return {dlat: ll.lat() + dll.dlat, dlng: ll.lng() + dll.dlng}
+}
+coordThings.shiftLatLngMetricGoogle = function(ll, dv) {
 	dll = coordThings.metresToDeg(dv)
 	return new google.maps.LatLng(ll.lat() + dll.dlat, ll.lng() + dll.dlng)
 }
@@ -121,6 +156,12 @@ coordThings.pathFromMetricDeltas = function(refLL, dv, verts, angle) {
 	return verts.map(function(v) {
 		var shift = coordThings.shiftMetric(coordThings.rotate(v, angle), dv)
 		return coordThings.shiftLatLngMetric(refLL, shift)
+	})
+}
+coordThings.pathFromMetricDeltasGoogle = function(refLL, dv, verts, angle) {
+	return verts.map(function(v) {
+		var shift = coordThings.shiftMetric(coordThings.rotate(v, angle), dv)
+		return coordThings.shiftLatLngMetricGoogle(refLL, shift)
 	})
 }
 coordThings.isPointInPoly = function(pt, verts) {
@@ -164,10 +205,24 @@ coordThings.isPointInPoly = function(pt, verts) {
 
 	return (theta > 1e-10 ? true : false)
 }
+coordThings.approxPolyMembership = function(vertsBase, verts) {
+	for (var i = 0; i < verts.length; i++) {
+		if(coordThings.isPointInPoly(verts[i], vertsBase)) {
+			return true
+		}
+	}
+	return false
+}
+coordThings.approxPolyIntersection = function(verts1, verts2) {
+	return coordThings.approxPolyMembership(verts1, verts2) && coordThings.approxPolyMembership(verts2, verts1)
+}
 
+if (false)
 {
+	// Intersection Tests
 	var vvvv = [coordThings.delta(0,0), coordThings.delta(2,0), coordThings.delta(0.5,0.5), coordThings.delta(0,2)]
-	var vvvv2 = [coordThings.delta(0,0), coordThings.delta(2,0), coordThings.delta(0.5,0.5), coordThings.delta(0,2)]
+	var vvvv2 = [coordThings.delta(-0.5,-0.5), coordThings.delta(2,0), coordThings.delta(0.25,0.25), coordThings.delta(0,2)]
+	var vvvv3 = [coordThings.delta(0.1,0.1), coordThings.delta(0.2,0.1), coordThings.delta(0.2,0.2), coordThings.delta(0.1,0.2)]
 	var pt_in = coordThings.delta(0.25, 0.25)
 	var pt_out1 = coordThings.delta(1, 1);
 	var pt_out2 = coordThings.delta(1, -1);
@@ -178,6 +233,9 @@ coordThings.isPointInPoly = function(pt, verts) {
 	tests.assertEqual("Out 2", coordThings.isPointInPoly(pt_out2, vvvv), false)
 	tests.assertEqual("Just In", coordThings.isPointInPoly(pt_just_in, vvvv), true)
 	tests.assertEqual("Just Out", coordThings.isPointInPoly(pt_just_out, vvvv), false)
+	tests.assertEqual("Small Square in Poly", coordThings.approxPolyMembership(vvvv, vvvv3), true)
+	tests.assertEqual("Poly in Small Square", coordThings.approxPolyMembership(vvvv3, vvvv), false)
+	tests.assertEqual("Poly Check", coordThings.approxPolyIntersection(vvvv, vvvv2), true)
 }
 
 // Make Ship
@@ -328,9 +386,12 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.getDims = function() {
 		return shipFactory.makeShipDims(ship._dims.length, ship._dims.breadth, ship._dims.fwd)
 	}
-	ship.updatePosition = function(_v, _theta) {
+	ship.updatePosition = function(_v, _theta, _basePosition) {
+		__basePosition = _basePosition ? _basePosition : ship.basePosition
+
 		ship.v = _v
 		ship.theta = _theta
+		ship.basePosition = __basePosition
 		ship.updateShipPoly()
 	}
 	ship.updateDomainParams = function(_safety_radius, _fwd_distance, _fwd_angle) {
@@ -340,7 +401,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		ship.updateDomainPoly()
 	}
 	ship.makeShipPath = function() {
-		var path = coordThings.pathFromMetricDeltas(ship.basePosition, ship.v, ship.shipVerts, ship.theta)
+		var path = coordThings.pathFromMetricDeltasGoogle(ship.basePosition, ship.v, ship.shipVerts, ship.theta)
 		return path
 	}
 	ship.updateDomainVerts = function() {
@@ -349,7 +410,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.updateDomainVerts()	
 	ship.makeDomainPath = function() {
 		ship.updateDomainVerts()
-		var path = coordThings.pathFromMetricDeltas(ship.basePosition, ship.v, ship.domainVerts, ship.theta)
+		var path = coordThings.pathFromMetricDeltasGoogle(ship.basePosition, ship.v, ship.domainVerts, ship.theta)
 		return path
 	}
 	ship.makeShipPoly = function() {
@@ -418,8 +479,8 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	}
 	ship.placeOnMap = function(map) {
 		if (!ship._map) {
-			ship._shipDomainPoly.setMap(map);
-			ship._shipPoly.setMap(map);
+			ship._shipDomainPoly.setMap(map)
+			ship._shipPoly.setMap(map)
 
 			ship._map = map
 		}
@@ -435,10 +496,37 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	_shipPoly = ship.makeShipPoly()
 	_shipDomainPoly = ship.makeDomainPoly()
 
-	ship.getDomainBoundingBox = function() {
-		return coordThings.boundingBox(
-			ship.shipVerts.map(function(vv){return coordThings.shiftMetric(vv, ship.v)})
-			)
+	ship.latLonOfDomainVerticesAndBoundingBox = function() {
+		ret = {}
+		ret.verts = ship.domainVerts.map(function(vv){
+						return coordThings.flatEarthConversionLLtoMetric(
+							coordThings.shiftLatLngMetric(
+								ship.basePosition, coordThings.shiftMetric(vv, ship.v))
+							)
+						})
+		ret.flatEarthBB = coordThings.boundingBox(ret.verts)
+
+		return ret
+	}
+
+	ship.checkForDomainIntersection = function(otherShip) {
+		ship1Stuff = ship.latLonOfDomainVerticesAndBoundingBox()
+		ship2Stuff = otherShip.latLonOfDomainVerticesAndBoundingBox()
+
+		if (ship1Stuff.flatEarthBB.x_min > ship2Stuff.flatEarthBB.x_max) {
+			return false
+		}
+		if (ship2Stuff.flatEarthBB.x_min > ship1Stuff.flatEarthBB.x_max) {
+			return false
+		}
+		if (ship1Stuff.flatEarthBB.y_min > ship2Stuff.flatEarthBB.y_max) {
+			return false
+		}
+		if (ship2Stuff.flatEarthBB.y_min > ship1Stuff.flatEarthBB.y_max) {
+			return false
+		}
+
+		return coordThings.approxPolyIntersection(ship1Stuff.verts, ship2Stuff.verts)
 	}
 
 	return ship
