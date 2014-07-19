@@ -406,6 +406,8 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship._shipDomainPoly = null
 	ship._map = null
 
+	ship._mouseoverListener = null
+
 	ship.getDims = function() {
 		return shipFactory.makeShipDims(ship._dims.length, ship._dims.breadth, ship._dims.fwd)
 	}
@@ -436,11 +438,33 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		ship.domainVerts = shipFactory.makeShipDomainVerts(dims, ship.safetyRadius, ship.fwdDistance, ship.fwdAngle, ship.bwdDistance)
 	}
 	ship.updateDomainVerts()	
+
 	ship.makeDomainPath = function() {
 		ship.updateDomainVerts()
 		var path = coordThings.pathFromMetricDeltasGoogle(ship.basePosition, ship.v, ship.domainVerts, ship.theta)
 		return path
 	}
+
+	ship.clearMouseOverListener = function() {
+		if (ship._mouseoverListener) {
+			google.maps.event.removeListener(ship._mouseoverListener)
+			ship._mouseoverListener = null
+		}
+	}
+	ship.setMouseOverListener = function(cbFunction) {
+		ship.clearMouseOverListener()
+		if (ship._shipPoly) {
+			if (cbFunction) {
+				ship._mouseoverListenerCallback = cbFunction
+				ship._mouseoverListener = google.maps.event.addListener(ship._shipPoly, 'mouseover', ship._mouseoverListenerCallback)
+			}
+		}
+	}
+
+	ship.centre = function() {
+		return coordThings.shiftLatLngMetricGoogle(ship.basePosition, ship.v)
+	}
+
 	ship.makeShipPoly = function() {
 		var path = ship.makeShipPath()
 		poly = new google.maps.Polygon({
@@ -452,8 +476,15 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 			strokeWeight: 2
 		})
 		ship._shipPoly = poly
+
+		ship.clearMouseOverListener()
+		if (ship._mouseoverListenerCallback) {
+			ship._mouseoverListener = google.maps.event.addListener(poly, 'mouseover', ship._mouseoverListenerCallback)
+		}
+
 		return poly
 	}
+
 	ship.setShipPolyOptions = function(strokeColor, fillColor, strokeOpacity, fillOpacity) {
 		if (ship._shipPoly) {
 			ship._shipPoly.setOptions({
@@ -507,8 +538,8 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	}
 	ship.placeOnMap = function(map) {
 		if (!ship._map) {
-			ship._shipDomainPoly.setMap(map)
 			ship._shipPoly.setMap(map)
+			ship._shipDomainPoly.setMap(map)
 
 			ship._map = map
 		}
@@ -521,8 +552,8 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 			ship._map = null
 		}
 	}
-	_shipPoly = ship.makeShipPoly()
 	_shipDomainPoly = ship.makeDomainPoly()
+	_shipPoly = ship.makeShipPoly()
 
 	ship.latLonOfDomainVerticesAndBoundingBox = function() {
 		ret = {}
