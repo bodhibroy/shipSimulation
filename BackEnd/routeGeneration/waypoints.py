@@ -45,10 +45,10 @@ def generateWayPoints(route):
     """
     startPoint=route[0]
     endPoint=route[1]
-    wayPoints={}
-    wayPoints[0]=startPoint
+    wayPoints=[]
+    wayPoints.append(startPoint)
     steps=int(round(haversine(startPoint,endPoint)))+1
-    wayPoints[steps]=endPoint
+#     wayPoints[steps]=endPoint
     diffLongSteps=(endPoint[1]-startPoint[1])/(steps)
     diffLatSteps=(endPoint[0]-startPoint[0])/(steps)
     
@@ -56,13 +56,15 @@ def generateWayPoints(route):
         temp=[0.0,0.0]
         temp[0]=startPoint[0]+(i*diffLatSteps)
         temp[1]=startPoint[1]+(i*diffLongSteps)
-        wayPoints[i]=temp
-        
+        wayPoints.append(temp)
+    wayPoints.append(endPoint)
     return wayPoints
 
 if __name__ == "__main__":
-    startPoint=[1.220290, 103.782423]
-    endPoint=[1.268987, 103.795062]
+    startPoint=[1.188239, 103.894561]
+    endPoint=[1.248650, 104.057983]
     route=[startPoint,endPoint]
     print generateWayPoints(route)
-
+    # f=open('route1.txt','a')
+#     f.write(generateWayPoints(route))
+#     f.close()
