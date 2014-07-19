@@ -22,3 +22,20 @@ function initialize() {
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
+
+
+function checkForViolations(){
+	pairs = domainViolationService.check(ships);
+	for (var i = 0; i < pairs.length; i++) {
+		console.log(pairs[i]);
+		console.log(pairs[i][0]._shipId, pairs[i][1]._shipId);
+		// pairs[i][0].setShipPolyOptions('#000000', '#ff0000', 1, 0.7);
+// 		pairs[i][1].setShipPolyOptions('#000000', '#ff0000', 1, 0.7);
+		pairs[i][0].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7);
+		pairs[i][1].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7);
+		var li=document.createElement('li');
+		li.innerHTML=violatingPairs[i][0]._shipId + " " + violatingPairs[i][1]._shipId.toString();
+		document.getElementById('10min').appendChild(li);
+	}
+	console.log(pairs);
+}
