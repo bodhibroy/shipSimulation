@@ -67,8 +67,10 @@ function initialize() {
 	map = new google.maps.Map(mapDiv, {
 		center: jumboEastCoast,
 		zoom: 15,
+		//mapTypeID: google.maps.MapTypeId.TERRAIN
+		//mapTypeID: google.maps.MapTypeId.SATELLITE
 		// mapTypeId: google.maps.MapTypeId.ROADMAP
-		mapTypeId: google.maps.MapTypeId.HYBRID
+		//mapTypeId: google.maps.MapTypeId.HYBRID
 		/*
 		MapTypeId.ROADMAP displays the default road map view. This is the default map type.
 		MapTypeId.SATELLITE displays Google Earth satellite images
@@ -76,6 +78,7 @@ function initialize() {
 		MapTypeId.TERRAIN displays a physical map based on terrain information.
 		*/
 	});
+	//map.setTilt(45);
 	var infoWindow = new google.maps.InfoWindow({
 		position: jumboEastCoast,
 		content: 'Jumbo Seafood East Coast'
