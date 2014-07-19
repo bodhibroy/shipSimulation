@@ -4,16 +4,18 @@
 <title>Google Maps V3 API Sample</title>
 <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
 
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="js/gmapsBoating.js"></script>
 
 <script type="text/javascript">
 var map;
 var mapDiv;
 var jumboEastCoast = new google.maps.LatLng(1.305189, 103.930657);
+var jumboEastCoastLobby = new google.maps.LatLng(1.305189, 103.930657 -  400.0 / 111319.9);
 var floatAround = true
 
 
-function driftPoly(ship, dv, angle, speed) {
+function driftPoly_old(ship, dv, angle, speed) {
 	var newSpeed = Math.max(0, speed + Math.sqrt(200.0 / ship._dims.length) * (Math.random() - 0.5) * 0.1)
 	var newAngle = (angle + Math.random() - 0.55) % 360	
 	var newDv = coordThings.shiftMetric(dv, coordThings.makeVector(angle, newSpeed))
@@ -28,9 +30,21 @@ function driftPoly(ship, dv, angle, speed) {
 	}
 }
 
+function driftPoly(ship, dv, angle, speed) {
+	var newSpeed = Math.max(0, speed + Math.sqrt(200.0 / ship._dims.length) * (Math.random() - 0.5) * 0.1)
+	var newAngle = (angle + Math.random() - 0.55) % 360	
+	var newDv = coordThings.shiftMetric(dv, coordThings.makeVector(angle, newSpeed))
+	ship.updatePosition(newDv, newAngle)
+	ship.updateDomainParams()
+
+	if (floatAround) {
+		window.setTimeout(function(){driftPoly(ship, newDv, newAngle, newSpeed)}, 20)
+	}
+}
+
 function floatABoat(length) {
 	var ship = shipFactory.makeEZShip(shipFactory.makeShipDims(length, Math.pow(length,2.0/3.0)+1, length/20.0), jumboEastCoast)
-	ship.updateDomainParams(length / 4.0, length / 8.0, 10)
+	ship.updateDomainParams(length / 3.0, 4 * length / 3.0, 10, length / 6.0)
 	ship.placeOnMap(map)
 
 	var shipCol = misc.rgbToHex(Math.round(Math.random()*255), Math.round(Math.random()*255), Math.round(Math.random()*255))
@@ -45,8 +59,13 @@ function floatABoat(length) {
 	return ship
 }
 
-function floatAStationaryBoat(length, v, angle, safety_radius, fwd_distance, fwd_angle, RGB) {
-	var ship = shipFactory.makeEZShip(shipFactory.makeShipDims(length, Math.pow(length,2.0/3.0)+1, length/20.0), jumboEastCoast)
+function floatAStationaryBoat(length, v, angle, safety_radius, fwd_distance, fwd_angle, RGB, baseLocation) {
+	var ship
+	if (baseLocation) {
+	ship = shipFactory.makeEZShip(shipFactory.makeShipDims(length, Math.pow(length,2.0/3.0)+1, length/20.0), baseLocation)
+	} else {
+		ship = shipFactory.makeEZShip(shipFactory.makeShipDims(length, Math.pow(length,2.0/3.0)+1, length/20.0), jumboEastCoast)
+	}
 	ship.updatePosition(v, angle)
 	ship.updateDomainParams(safety_radius, fwd_distance, fwd_angle)
 	ship.placeOnMap(map)
@@ -107,7 +126,28 @@ function initialize() {
 
 	ship1 = floatAStationaryBoat(100, coordThings.delta(700, -1500), 0, 30, 0, 0, {R: 128, G: 0, B: 255})
 	ship2 = floatAStationaryBoat(200, coordThings.delta(800, -1550), 20, 30, 20, 10, {R: 0, G: 0, B: 255})
+	ship3 = floatAStationaryBoat(200, coordThings.delta(800, -1550), 20, 30, 20, 10, {R: 0, G: 255, B: 255}, jumboEastCoastLobby)
+
 	console.log(ship1.checkForDomainIntersection(ship2))
+	console.log(ship2.checkForDomainIntersection(ship1))
+	console.log(ship1.checkForDomainIntersection(ship3))
+	console.log(ship2.checkForDomainIntersection(ship3))
+
+	$.getJSON("testData.json", function( data ) {
+		/*
+		var items = [];
+		alert(data)
+
+		$.each( data, function( key, val ) {
+	    	items.push( "<li id='" + key + "'>" + val + "</li>" );
+		});
+		$( "<ul/>", {
+			"class": "my-new-list",
+	    	html: items.join( "" )
+	    }).appendTo( "body" );
+		*/
+	    console.log(data)
+	});
 
 }
 

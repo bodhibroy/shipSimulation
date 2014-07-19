@@ -1,0 +1,71 @@
+[
+	{
+		'id': 1,
+		'type': 'Cargo',
+		'length': 200,
+		'breadth': 40,
+		'lat': 1.325189,
+		'lon': 103.950657,
+		'angle': 10,
+		'isStopped': false,
+
+		// Parameters Used for Defining Domain
+		'safety_radius': 30,
+		'fwd_distance': 50,
+		'fwd_angle': 15,
+
+		// Good to know for “mouse over”
+		'speed': 20,
+		'status': 'Moving',
+		'draught': 20,
+		'ship_name': 'Some Ship',
+		'flag': 'Singapore',
+		'destination': 'Marina Bay Sands'
+	},
+	{
+		'id': 2,
+		'type': 'Expensive Waste of Metal',
+		'length': 100,
+		'breadth': 30,
+		'lat': 1.329189,
+		'lon': 103.951657,
+		'angle': -10,
+		'isStopped': false,
+
+		// Parameters Used for Defining Domain
+		'safety_radius': 25,
+		'fwd_distance': 60,
+		'fwd_angle': 10,
+
+		// Good to know for “mouse over”
+		'speed': 40,
+		'status': 'Moving',
+		'draught': 20,
+		'ship_name': 'Merman',
+		'flag': 'Singapore',
+		'destination': 'Marina Bay Sands'
+	},
+	{
+		'id': 3,
+		'type': 'Expensive Waste of Metal',
+		'length': 80,
+		'breadth': 30,
+		'lat': 1.324189,
+		'lon': 103.949657,
+		'angle': 0,
+		'isStopped': false,
+
+		// Parameters Used for Defining Domain
+		'safety_radius': 20,
+		'fwd_distance': 20,
+		'fwd_angle': 5,
+
+		// Good to know for “mouse over”
+		'speed': 30,
+		'status': 'Moving',
+		'draught': 20,
+		'ship_name': 'Mermaid',
+		'flag': 'Singapore',
+		'destination': 'Marina Bay Sands'
+	},
+]

@@ -256,10 +256,26 @@ shipFactory.makeShipVerts = function(dims) {
 				]
 }
 
-shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fwd_angle, refinement_level) {
+shipFactory.makeShipVertsStopped = function(dims) {
+	return [
+				{dx:dims.length/2.0 + dims.fwd, dy:0},
+				{dx:dims.length/2.0, dy:dims.breadth/2.0},
+				{dx:-dims.length/2.0, dy:dims.breadth/2.0},
+				{dx:-dims.fwd-dims.length/2.0, dy:0},
+				{dx:-dims.length/2.0, dy:-dims.breadth/2.0},
+				{dx:dims.length/2.0, dy:-dims.breadth/2.0},
+				// Not Closed
+				]
+}
+
+shipFactory.makeShipDomainVerts = function(dims, _safety_radius, _fwd_distance, _fwd_angle, _bwd_distance, refinement_level) {
+
+	safety_radius = _safety_radius ? _safety_radius : dims.length / 3.0
+	fwd_distance = _fwd_distance ? _fwd_distance : 4 * dims.length / 3.0
+	fwd_angle = _fwd_angle ? _fwd_angle : 5
+	bwd_distance = _bwd_distance ? _bwd_distance : dims.length / 6.0
 
 	var DEFAULT_RESOLUTION = 5
-
 	var R = (refinement_level ? refinement_level : DEFAULT_RESOLUTION)
 
 	var verts = []
@@ -276,19 +292,19 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 	// Top Back
 	// R = 5
 	for (var i = 0; i <= R; i++) {
-		verts.push({dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(90 + i*(90.0/R)), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(90 + i*(90.0/R))})
+		verts.push({dx: -dims.length/2.0 + (safety_radius+bwd_distance)*coordThings.cosDeg(90 + i*(90.0/R)), dy: dims.breadth/2.0 + safety_radius*coordThings.sinDeg(90 + i*(90.0/R))})
 	}
 
 	// Back
 	// R = 5
 	for (var i = 1; i < R; i++) {
-		verts.push({dx: -dims.length/2.0 - safety_radius, dy: dims.breadth/2.0 - i*(1.0*dims.breadth/R)})
+		verts.push({dx: -dims.length/2.0 - (safety_radius+bwd_distance), dy: dims.breadth/2.0 - i*(1.0*dims.breadth/R)})
 	}
 
 	// Bottom Back
 	// R = 5
 	for (var i = 0; i <= R; i++) {
-		verts.push({dx: -dims.length/2.0 + safety_radius*coordThings.cosDeg(180 + i*(90.0/R)), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(180 + i*(90.0/R))})
+		verts.push({dx: -dims.length/2.0 + (safety_radius+bwd_distance)*coordThings.cosDeg(180 + i*(90.0/R)), dy: -dims.breadth/2.0 + safety_radius*coordThings.sinDeg(180 + i*(90.0/R))})
 	}
 
 	// Bottom Left Mid
@@ -318,7 +334,7 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 	var dto = 1.0 * fwd_angle / R
 	for (var i = 0; i <= R; i++) {
 		verts.push({	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(-coordThings.sinDeg(-fwd_angle+i*dto))
-							+ fwd_distance * coordThings.sinDeg(i * (90.0 / R)) * coordThings.sinDeg(i * (90.0 / R)),
+							,//+ fwd_distance * coordThings.sinDeg(i * (90.0 / R)) * coordThings.sinDeg(i * (90.0 / R)),
 						dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.sinDeg(-fwd_angle+i*dto)) + (-dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto))
 					})
 	}
@@ -326,7 +342,7 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 	// Front
 	// R = 5
 	for (var i = 1; i < R; i++) {
-		verts.push({	dx: dims.length/2 + fwd_distance + safety_radius + fwd_distance,
+		verts.push({	dx: dims.length/2 + fwd_distance + safety_radius,
 						dy: (-dims.breadth/2) + i * (1.0 * dims.breadth / R)
 					})
 	}
@@ -337,7 +353,7 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 	var dto = 1.0 * fwd_angle / R
 	for (var i = R; i <= 2*R; i++) {
 		verts.push({	dx: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(-coordThings.sinDeg(-fwd_angle+i*dto))
-							+ fwd_distance * coordThings.sinDeg(i * (90.0 / R)) * coordThings.sinDeg(i * (90.0 / R)),
+							,//+ fwd_distance * coordThings.sinDeg(i * (90.0 / R)) * coordThings.sinDeg(i * (90.0 / R)),
 						dy: (dims.length/2+fwd_distance+safety_radius*coordThings.cosDeg(-90+i*dtc))*(coordThings.sinDeg(-fwd_angle+i*dto)) + (dims.breadth/2+safety_radius*coordThings.sinDeg(-90+i*dtc))*(coordThings.cosDeg(-fwd_angle+i*dto))
 					})
 	}
@@ -359,12 +375,18 @@ shipFactory.makeShipDomainVerts = function(dims, safety_radius, fwd_distance, fw
 	return verts
 }
 
-shipFactory.makeShipPath = function(dims, angle, basePosition, dv) {
-	var verts = shipFactory.makeShipVerts(dims)
+shipFactory.makeShipPath = function(dims, angle, basePosition, dv, isStopped) {
+	var verts
+	if(isStopped) {
+		verts = shipFactory.makeShipVertsStopped(dims)
+	}
+	else {
+		verts = shipFactory.makeShipVerts(dims)
+	}
 	var path = coordThings.pathFromMetricDeltas(basePosition, dv, verts, angle)
 	return path
 }
-	
+
 shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	var ship = {}
 
@@ -377,6 +399,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.safetyRadius = 0
 	ship.fwdDistance = 0
 	ship.fwdAngle = 0
+	ship.bwdDistance = 0
 	ship.domainVerts = null
 
 	ship._shipPoly = null
@@ -386,18 +409,23 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.getDims = function() {
 		return shipFactory.makeShipDims(ship._dims.length, ship._dims.breadth, ship._dims.fwd)
 	}
-	ship.updatePosition = function(_v, _theta, _basePosition) {
-		__basePosition = _basePosition ? _basePosition : ship.basePosition
+	ship.updatePosition = function(_v, _theta, _basePosition, _isStopped) {
+		if (_isStopped) {
+			ship.shipVerts = shipFactory.makeShipVertsStopped(dims)
+		} else {
+			ship.shipVerts = shipFactory.makeShipVerts(dims)
+		}
 
-		ship.v = _v
-		ship.theta = _theta
-		ship.basePosition = __basePosition
+		ship.v = _v ? _v : ship.v
+		ship.theta = _theta ? _theta : ship.theta
+		ship.basePosition = _basePosition ? _basePosition : ship.basePosition
 		ship.updateShipPoly()
 	}
-	ship.updateDomainParams = function(_safety_radius, _fwd_distance, _fwd_angle) {
-		ship.safetyRadius = _safety_radius
-		ship.fwdDistance = _fwd_distance
-		ship.fwdAngle = _fwd_angle
+	ship.updateDomainParams = function(_safety_radius, _fwd_distance, _fwd_angle, _bwd_distance) {
+		ship.safetyRadius = _safety_radius ? _safety_radius : ship.safetyRadius
+		ship.fwdDistance = _fwd_distance ? _fwd_distance : ship.fwdDistance
+		ship.fwdAngle = _fwd_angle ? _fwd_angle : ship.fwdAngle
+		ship.bwdDistance = _bwd_distance ? _bwd_distance : ship.bwdDistance
 		ship.updateDomainPoly()
 	}
 	ship.makeShipPath = function() {
@@ -405,7 +433,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		return path
 	}
 	ship.updateDomainVerts = function() {
-		ship.domainVerts = shipFactory.makeShipDomainVerts(dims, ship.safetyRadius, ship.fwdDistance, ship.fwdAngle)
+		ship.domainVerts = shipFactory.makeShipDomainVerts(dims, ship.safetyRadius, ship.fwdDistance, ship.fwdAngle, ship.bwdDistance)
 	}
 	ship.updateDomainVerts()	
 	ship.makeDomainPath = function() {
