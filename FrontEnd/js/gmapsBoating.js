@@ -34,6 +34,9 @@ misc.reduceFunctionMaxY = function(previousValue, currentValue, index, array) {
 	return Math.max(previousValue, currentValue.dy)
 }
 
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
 
 // Testing Stuff
 var tests = {}
@@ -68,6 +71,10 @@ tests.assertLE = function(testName, v1, v2) {
 	}
 }
 
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
 
 // Coordinate Things
 var coordThings = {
@@ -238,8 +245,13 @@ if (false)
 	tests.assertEqual("Poly Check", coordThings.approxPolyIntersection(vvvv, vvvv2), true)
 }
 
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+
 // Make Ship
 var shipFactory = {}
+shipFactory.numShips = 0
 shipFactory.makeShipDims = function(length, breadth, fwd) {
 	return {length: length, breadth: breadth, fwd: fwd}
 }
@@ -390,6 +402,9 @@ shipFactory.makeShipPath = function(dims, angle, basePosition, dv, isStopped) {
 shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	var ship = {}
 
+	ship._shipId = shipFactory.numShips
+	shipFactory.numShips += 1
+
 	ship._dims = dims
 	ship.basePosition = basePosition
 	ship.v = v
@@ -422,6 +437,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		ship.theta = _theta ? _theta : ship.theta
 		ship.basePosition = _basePosition ? _basePosition : ship.basePosition
 		ship.updateShipPoly()
+		ship.updateDomainPoly()
 	}
 	ship.updateDomainParams = function(_safety_radius, _fwd_distance, _fwd_angle, _bwd_distance) {
 		ship.safetyRadius = _safety_radius ? _safety_radius : ship.safetyRadius
@@ -594,3 +610,27 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 shipFactory.makeEZShip = function(dims, basePosition) {
 	return shipFactory.makeShip(dims, basePosition, coordThings.delta(0,0), 0) 
 }
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+
+// Space
+var domainViolationService = {}
+
+domainViolationService.check = function(allShips) {
+	var violatingPairs = []
+	for (var i = 0; i < allShips.length; i++) {
+		if (allShips[i]._map != null) {
+			for (var j = i+1; j < allShips.length; j++) {
+				if (allShips[j]._map != null) {
+					if (allShips[i].checkForDomainIntersection(allShips[j])) {
+						violatingPairs.push([allShips[i], allShips[j]])
+					}
+				}
+			}
+		}
+	}
+	return violatingPairs
+}
+//*/

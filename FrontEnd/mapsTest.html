@@ -51,14 +51,18 @@ function floatABoat(length) {
 	var shipCol = misc.rgbToHex(Math.round(Math.random()*255), Math.round(Math.random()*255), Math.round(Math.random()*255))
 	var domainCol = misc.rgbToHex(Math.round(Math.random()*255), Math.round(Math.random()*255), Math.round(Math.random()*255))
 	ship.setShipPolyOptions(shipCol, shipCol, 0.8, 0.3)
-	ship.setShipDomainPolyOptions(domainCol, domainCol, 0.3, 0.1)
+	ship.setShipDomainPolyOptions(domainCol, domainCol, 0.5, 0.3)
 
-	ship.setMouseOverListener(function(){ console.log(ship._dims) })
+	ship.setMouseOverListener(function(){ console.log(ship._shipId) })
 
 	pos = coordThings.delta(Math.random()*1000 - 500, -100 - Math.random()*1000)
 	angle = Math.random()*360
 	speed = Math.sqrt(200.0 / ship._dims.length) * 2
-	driftPoly(ship, pos, angle, speed)
+
+	ship.updatePosition(pos, angle)
+
+	//driftPoly(ship, pos, angle, speed)
+
 	return ship
 }
 
@@ -129,7 +133,7 @@ function initialize() {
 	ships.push(floatAStationaryBoat(100, coordThings.delta(550 + shift_x2, -900 + shift_y2), -8, 30, 0, 0, {R: 0, G: 0, B: 255}))
 	ships.push(floatAStationaryBoat(50, coordThings.delta(300 + shift_x2, -950 + shift_y2), 20, 20, 5, 0, {R: 0, G: 255, B: 0}))
 
-
+	/*
 	ship1 = floatAStationaryBoat(100, coordThings.delta(700, -1500), 0, 30, 0, 0, {R: 128, G: 0, B: 255})
 	ship2 = floatAStationaryBoat(200, coordThings.delta(800, -1550), 20, 30, 20, 10, {R: 0, G: 0, B: 255})
 	ship3 = floatAStationaryBoat(200, coordThings.delta(800, -1550), 20, 30, 20, 10, {R: 0, G: 255, B: 255}, jumboEastCoastLobby)
@@ -142,6 +146,16 @@ function initialize() {
 	ship1.setMouseOverListener(function(){ map.setCenter( ship2.centre() ) })
 	ship1.clearMouseOverListener()
 	ship1.setMouseOverListener(function(){ console.log('hi') })
+
+	console.log( domainViolationService.check([ship1, ship2, ship3]) )
+	*/
+
+	pairs = domainViolationService.check(ships)
+	for (var i = 0; i < pairs.length; i++) {
+		pairs[i][0].setShipPolyOptions('#000000', '#ff0000', 1, 0.7)
+		pairs[i][1].setShipPolyOptions('#000000', '#ff0000', 1, 0.7)
+	}
+	console.log( pairs )
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
