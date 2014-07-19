@@ -416,6 +416,11 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		ship.shipType = shipType
 	}
 
+	ship.shipName = 'Untitled'
+	ship.setShipName = function(shipName) {
+		ship.shipName = shipName
+	}
+
 	ship.safetyRadius = 0
 	ship.fwdDistance = 0
 	ship.fwdAngle = 0
@@ -431,7 +436,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship.getDims = function() {
 		return shipFactory.makeShipDims(ship._dims.length, ship._dims.breadth, ship._dims.fwd)
 	}
-	ship.updatePosition = function(_v, _theta, _basePosition, _isStopped) {
+	ship.updatePosition = function(_v, _theta, _basePosition, _isStopped, _updateDomainPolyToo) {
 		if (_isStopped) {
 			ship.shipVerts = shipFactory.makeShipVertsStopped(dims)
 		} else {
@@ -442,7 +447,9 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 		ship.theta = _theta ? _theta : ship.theta
 		ship.basePosition = _basePosition ? _basePosition : ship.basePosition
 		ship.updateShipPoly()
-		ship.updateDomainPoly()
+		if (_updateDomainPolyToo) {
+			ship.updateDomainPoly()
+		}
 	}
 	ship.updateDomainParams = function(_safety_radius, _fwd_distance, _fwd_angle, _bwd_distance) {
 		ship.safetyRadius = _safety_radius ? _safety_radius : ship.safetyRadius
