@@ -19,7 +19,7 @@ typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
 
 var shipData = []
 shipData['Cargo'] = {length: 180, breadth: Math.pow(180.0, 2.0/3) + 1, GT: 100000, cargoType: function() {var items=['Gas','Chemical','Container Cargo', 'Passengers', 'Vehicles'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
-shipData['Tanker'] = {length: 250, breadth: Math.pow(250.0, 2.0/3) + 1, GT: 200000,cargoType: function() {return 'Oil (Crude/Refined)'}, max_speed: 25}
+shipData['Tanker'] = {length: 250, breadth: Math.pow(250.0, 2.0/3) + 1, GT: 200000,cargoType: function() {return 'Petrochemicals'}, max_speed: 25}
 shipData['Passenger'] = {length: 80, breadth: Math.pow(80.0, 2.0/3) + 1, GT: 50000,cargoType: function() {return 'Passengers'}, max_speed: 30}
 shipData['High Speed Craft'] = {length: 40, breadth: Math.pow(40.0, 2.0/3) + 1, GT: 40000, cargoType: function() {return 'Passengers'}, max_speed: 50}
 shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType: function() {return 'Passengers'},max_speed: 15}
@@ -48,7 +48,7 @@ function checkForViolations() {
 		var pos1 = coordThings.shiftLatLngMetric(pairs[i][0].basePosition, pairs[i][0].v)
 		var pos2 = coordThings.shiftLatLngMetric(pairs[i][1].basePosition, pairs[i][1].v)
 
-		li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + pairs[i][0]._shipId + " " + pairs[i][1]._shipId.toString() + "</A>";
+		li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + pairs[i][0].shipName + '('+pairs[i][0].cargoType+')' + " and " + pairs[i][1].shipName + '('+pairs[i][1].cargoType+')' + "</A> <br ><br>";
 		document.getElementById('10min').appendChild(li);
 	}
 }
@@ -58,8 +58,8 @@ function getStatusFunction(ship) {
 			document.getElementById('sname').innerHTML = ship.shipName
 			document.getElementById('ctype').innerHTML = ship.cargoType
 			var dll = coordThings.shiftLatLngMetric(ship.basePosition, ship.v)
-			document.getElementById('location').innerHTML = (Math.floor(dll.dlat*100)/100) + ' deg N<br>' + (Math.floor(dll.dlng*100)/100) + ' deg E'
-			document.getElementById('heading').innerHTML = ship.theta
+			document.getElementById('location').innerHTML = (Math.floor(dll.dlat*100)/100) + ' &#x00B0;N<br>' + (Math.floor(dll.dlng*100)/100) + ' &#x00B0;E'
+			document.getElementById('heading').innerHTML = Math.round(ship.theta*100)/100 + '&deg;'
 			console.log(ship._shipId + ' ' + ship.theta)
 		}
 }
