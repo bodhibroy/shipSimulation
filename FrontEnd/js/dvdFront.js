@@ -13,12 +13,12 @@ typeColors['Tugs/Pilots'] = {fill: '#00BFFF', stroke: '#000000'}
 typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
 
 var shipData = []
-shipData['Cargo'] = {length: 100, breadth: 30, GT: 100, cargoType: function() {return 'Gas'}, max_speed: 00}
-shipData['Tanker'] = {length: 100, breadth: 30}
-shipData['Passenger'] = {length: 100, breadth: 30}
-shipData['High Speed Craft'] = {length: 100, breadth: 30}
-shipData['Tugs/Pilots'] = {length: 100, breadth: 30}
-shipData['Yacht'] = {length: 100, breadth: 30}
+shipData['Cargo'] = {length: 100, breadth: 30, GT: 1000000, cargoType: function() {var items=['Gas','Chemical','Container Cargo', 'Passenger', 'Vehicles'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
+shipData['Tanker'] = {length: 100, breadth: 30, GT: 2300000,cargoType: 'Oil (Crude/Refined)', max_speed: 25}
+shipData['Passenger'] = {length: 100, breadth: 30, GT: 100000,cargoType: 'Passenger', max_speed: 30}
+shipData['High Speed Craft'] = {length: 100, breadth: 30, GT: 2300000, cargoType:'Passenger', max_speed: 40}
+shipData['Tugs/Pilots'] = {length: 100, breadth: 30, GT: 2300000, cargoType='Vessels',max_speed: 15}
+shipData['Yacht'] = {length: 100, breadth: 30, GT: 2300000, cargoType='Vessels', max_speed: 50}
 
 
 function checkForViolations() {
