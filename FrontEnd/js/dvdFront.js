@@ -6,7 +6,7 @@ var idxToShipId=[]
 var shipTypes = ['Cargo', 'Tanker', 'Passenger', 'High Speed Craft', 'Tugs/Pilots', 'Yacht']
 
 function randomShipType() {
-	return 'Cargo'
+	return shipTypes[Math.floor(Math.random()*shipTypes.length)]
 }
 
 var typeColors = []
@@ -52,12 +52,15 @@ function checkForViolations() {
 }
 
 function initShipSimulation() {
-	for (var i = 0; i < routes.length; i++) {
+	for (var i = 0; i < 50; i++) {
 		var thisShipType = randomShipType()
 		var ship_dimensions = shipFactory.makeShipDims(shipData[thisShipType].length, shipData[thisShipType].breadth, shipData[thisShipType].length/20.0)
-		var ship_location = new google.maps.LatLng(routes[i][0][0], routes[i][0][1])
+
+		var pt = chuckPointsAtJeremy()
+		var ship_location = new google.maps.LatLng(pt[0], pt[1])
 
 		var ship = shipFactory.makeEZShip(ship_dimensions, ship_location)
+		ship.theta = Math.random() * -5 - 15
 		ship.setShipType(thisShipType)
 		ship.velocity_in_metres = (shipData[thisShipType].max_speed / 4.0) * (1 + 2 * Math.random())
 		ship.GT = shipData[thisShipType].GT
@@ -70,23 +73,28 @@ function initShipSimulation() {
 
 
 	for (var i = 0; i < ships.length; i++) {
-		console.log(ships[i].shipType)
 		var myTypeColor = typeColors[ships[i].shipType]
-		console.log(myTypeColor)
 		ships[i].setShipPolyOptions(myTypeColor.stroke, myTypeColor.fill, 0.8, 0.6);
 		ships[i].setShipDomainPolyOptions('#000000', '#ff0000', 0.4, 0.2);
+
+		ships[i].placeOnMap(map)
 	}
 }
 
 var TIME_STEP_IN_MS = 50
 function takeASimulationStep() {
+
 	for (var i = 0; i < ships.length; i++) {
 
-		var new_v = coordThings.shiftMetricfunction(ships[i].v,
-				coordThings.delta((TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*cos(ships[i].theta), (TIME_STEP_IN_MS/1000) * thisShip.velocity_in_metres*sin(ships[i].theta)))
-		ships[i].updatePosition(new_v, thisShip.theta + Math.random()*TIME_STEP_IN_MS)
+		var new_v = coordThings.shiftMetric(ships[i].v,
+				coordThings.delta((TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.cosDeg(ships[i].theta),
+							(TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.sinDeg(ships[i].theta))
+				)
 
-		ship[i].updateDomainParams(2 * ships[i]._dims.breadth,
+		ships[i].updatePosition(new_v, ships[i].theta + Math.random()*TIME_STEP_IN_MS/1000.0)
+		ships[i].velocity_in_metres = Math.max(0, ships[i].velocity_in_metres + Math.random() * TIME_STEP_IN_MS / 1000.0 )
+
+		ships[i].updateDomainParams(2 * ships[i]._dims.breadth,
 									ships[i]._dims.length * (2.5 - Math.exp(- (ships[i].velocity_in_metres / 20.0) * (ships[i].GT / 50000.0))),
 									15 * Math.exp(- ships[i].velocity_in_metres / 20.0),
 									0.25 * ships[i]._dims.length)
