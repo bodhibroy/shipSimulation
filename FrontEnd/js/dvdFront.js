@@ -18,12 +18,12 @@ typeColors['Tugs/Pilots'] = {fill: '#00BFFF', stroke: '#000000'}
 typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
 
 var shipData = []
-shipData['Cargo'] = {length: 300, breadth: 30, GT: 1000000, cargoType: function() {var items=['Gas','Chemical','Container Cargo', 'Passenger', 'Vehicles'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
-shipData['Tanker'] = {length: 400, breadth: 30, GT: 2300000,cargoType: 'Oil (Crude/Refined)', max_speed: 25}
-shipData['Passenger'] = {length: 200, breadth: 30, GT: 100000,cargoType: 'Passenger', max_speed: 30}
-shipData['High Speed Craft'] = {length: 100, breadth: 30, GT: 2300000, cargoType:'Passenger', max_speed: 40}
-shipData['Tugs/Pilots'] = {length: 50, breadth: 30, GT: 2300000, cargoType:'Crew',max_speed: 15}
-shipData['Yacht'] = {length: 35, breadth: 30, GT: 2300000, cargoType:'Passenger', max_speed: 50}
+shipData['Cargo'] = {length: 180, breadth: Math.pow(180.0, 2.0/3) + 1, GT: 100000, cargoType: function() {var items=['Gas','Chemical','Container Cargo', 'Passenger', 'Vehicles'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
+shipData['Tanker'] = {length: 250, breadth: Math.pow(250.0, 2.0/3) + 1, GT: 200000,cargoType: 'Oil (Crude/Refined)', max_speed: 25}
+shipData['Passenger'] = {length: 80, breadth: Math.pow(80.0, 2.0/3) + 1, GT: 50000,cargoType: 'Passenger', max_speed: 30}
+shipData['High Speed Craft'] = {length: 40, breadth: Math.pow(40.0, 2.0/3) + 1, GT: 40000, cargoType:'Passenger', max_speed: 50}
+shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType:'Crew',max_speed: 15}
+shipData['Yacht'] = {length: 30, breadth: Math.pow(30.0, 2.0/3) + 1, GT: 30000, cargoType:'Passenger', max_speed: 40}
 
 
 function checkForViolations() {
@@ -60,9 +60,9 @@ function initShipSimulation() {
 		var ship_location = new google.maps.LatLng(pt[0], pt[1])
 
 		var ship = shipFactory.makeEZShip(ship_dimensions, ship_location)
-		ship.theta = Math.random() * -5 - 15
+		ship.theta = Math.random() * -10 - 15
 		ship.setShipType(thisShipType)
-		ship.velocity_in_metres = (shipData[thisShipType].max_speed / 4.0) * (1 + 2 * Math.random())
+		ship.velocity_in_metres = (shipData[thisShipType].max_speed / 4.0) * (1 + 3 * Math.random())
 		ship.GT = shipData[thisShipType].GT
 
 		ships.push(ship)
