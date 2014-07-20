@@ -25,6 +25,10 @@ shipData['High Speed Craft'] = {length: 40, breadth: Math.pow(40.0, 2.0/3) + 1, 
 shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType: function() {return 'Passengers'},max_speed: 15}
 shipData['Yacht'] = {length: 30, breadth: Math.pow(30.0, 2.0/3) + 1, GT: 30000, cargoType: function() {return 'Passengers'}, max_speed: 40}
 
+function zoomTo(lat, lng) {
+	map.setCenter(new google.maps.LatLng(lat, lng))
+	map.setZoom(14)
+}
 
 function checkForViolations() {
 	for (var i = 0; i < ships.length; i++) {
@@ -35,20 +39,18 @@ function checkForViolations() {
 
 	document.getElementById('10min').innerHTML = ''
 	for (var i = 0; i < pairs.length; i++) {
-		console.log(pairs[i]);
-		console.log(pairs[i][0]._shipId, pairs[i][1]._shipId);
 		// pairs[i][0].setShipPolyOptions('#000000', '#ff0000', 1, 0.7);
 		// pairs[i][1].setShipPolyOptions('#000000', '#ff0000', 1, 0.7);
 		pairs[i][0].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7);
 		pairs[i][1].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7);
 		var li=document.createElement('li');
-		li.innerHTML=violatingPairs[i][0]._shipId + " " + violatingPairs[i][1]._shipId.toString();
-		li.onclick = function() {
-				map.panTo(coordThings.shiftLatLngMetricGoogle(pairs[i][0].basePosition, pairs[i][0].v))
-			}
+
+		var pos1 = coordThings.shiftLatLngMetric(pairs[i][0].basePosition, pairs[i][0].v)
+		var pos2 = coordThings.shiftLatLngMetric(pairs[i][1].basePosition, pairs[i][1].v)
+
+		li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + pairs[i][0]._shipId + " " + pairs[i][1]._shipId.toString() + "</A>";
 		document.getElementById('10min').appendChild(li);
 	}
-	console.log(pairs);
 }
 
 function getStatusFunction(ship) {
@@ -71,9 +73,9 @@ function initShipSimulation() {
 		var ship_location = new google.maps.LatLng(pt[0], pt[1])
 
 		var ship = shipFactory.makeEZShip(ship_dimensions, ship_location)
-		ship.theta = Math.random() * -10 - 15
+		ship.theta = (Math.random() * -45) - 15
 		ship.setShipType(thisShipType)
-		ship.velocity_in_metres = (shipData[thisShipType].max_speed / 4.0) * (1 + 3 * Math.random())
+		ship.velocity_in_metres = 1.8 * (shipData[thisShipType].max_speed / 4.0) * (1 + 3 * Math.random())
 
 		ship.GT = shipData[thisShipType].GT
 		ship.setShipName(randomShipName())
@@ -85,7 +87,6 @@ function initShipSimulation() {
 		// shipIdToIdx[shipID] = ships.length
 		// idxToShipId.push(shipID)
 	}
-
 
 
 	for (var i = 0; i < ships.length; i++) {
@@ -113,13 +114,13 @@ function takeASimulationStep() {
 		ships[i].velocity_in_metres = new_velocity
 
 		ships[i].updateDomainParams(2 * ships[i]._dims.breadth,
-									ships[i]._dims.length * (2.5 - Math.exp(- (ships[i].velocity_in_metres / 20.0) * (ships[i].GT / 50000.0))),
+									ships[i]._dims.length * (2 - Math.exp(- (ships[i].velocity_in_metres / 20.0) * (ships[i].GT / 50000.0))),
 									15 * Math.exp(- ships[i].velocity_in_metres / 20.0),
 									0.25 * ships[i]._dims.length)
 	}
 
 	// Test for domain violations
-
+	checkForViolations()
 
 	window.setTimeout(takeASimulationStep, TIME_STEP_IN_MS)
 }

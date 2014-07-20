@@ -30,6 +30,7 @@ Math.radians = function(degrees) {
   return degrees * Math.PI / 180;
 }
 
+
 function distance(p1,p2)
 {
 	lon1=p1[1]
@@ -37,6 +38,7 @@ function distance(p1,p2)
     lon2=p2[1]
     lat2=p2[0]
     // convert decimal degrees to radians 
+
     lon1=Math.radians(lon1)
     lat1=Math.radians(lat1)
     lon2=Math.radians(lon2)
@@ -49,6 +51,7 @@ function distance(p1,p2)
     m = 6367 *1000 * c
     return m
 }
+
 
 function checkHeading(p1,p2)
 {
