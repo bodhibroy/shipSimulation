@@ -435,6 +435,7 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 	ship._map = null
 
 	ship._mouseoverListener = null
+	ship._mouseoutListener = null
 
 	ship.getDims = function() {
 		return shipFactory.makeShipDims(ship._dims.length, ship._dims.breadth, ship._dims.fwd)
@@ -488,6 +489,22 @@ shipFactory.makeShip = function(dims, basePosition, v, theta) {
 			if (cbFunction) {
 				ship._mouseoverListenerCallback = cbFunction
 				ship._mouseoverListener = google.maps.event.addListener(ship._shipPoly, 'mouseover', ship._mouseoverListenerCallback)
+			}
+		}
+	}
+
+	ship.clearMouseOutListener = function() {
+		if (ship._mouseoutListener) {
+			google.maps.event.removeListener(ship._mouseoutListener)
+			ship._mouseoutListener = null
+		}
+	}
+	ship.setMouseOutListener = function(cbFunction) {
+		ship.clearMouseOutListener()
+		if (ship._shipPoly) {
+			if (cbFunction) {
+				ship._mouseoutListenerCallback = cbFunction
+				ship._mouseoutListener = google.maps.event.addListener(ship._shipPoly, 'mouseout', ship._mouseoutListenerCallback)
 			}
 		}
 	}

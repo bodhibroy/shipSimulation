@@ -59,8 +59,6 @@ function getStatusFunction(ship) {
 			document.getElementById('ctype').innerHTML = ship.cargoType
 			var dll = coordThings.shiftLatLngMetric(ship.basePosition, ship.v)
 			document.getElementById('location').innerHTML = (Math.floor(dll.dlat*100)/100) + ' deg N<br>' + (Math.floor(dll.dlng*100)/100) + ' deg E'
-
-			console.log(ship._shipId + ' ' + ship.shipName)
 		}
 }
 
@@ -82,6 +80,11 @@ function initShipSimulation() {
 		ship.cargoType = shipData[thisShipType].cargoType()
 
 		ship.setMouseOverListener(getStatusFunction(ship))
+		ship.setMouseOutListener(function() { 
+			document.getElementById('sname').innerHTML = '-'
+			document.getElementById('ctype').innerHTML = '-'
+			document.getElementById('location').innerHTML = '-'
+		})
 
 		ships.push(ship)
 		// shipIdToIdx[shipID] = ships.length
