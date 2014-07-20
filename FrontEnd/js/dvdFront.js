@@ -2,7 +2,6 @@ var jumboEastCoast = new google.maps.LatLng(1.305189, 103.930657);
 var ships = [];
 var shipIdToIdx=[]
 var idxToShipId=[]
-
 var shipTypes = ['Cargo', 'Tanker', 'Passenger', 'High Speed Craft', 'Tugs/Pilots', 'Yacht']
 
 function randomShipType() {
@@ -17,18 +16,42 @@ typeColors['High Speed Craft'] = {fill: '#FFFF00', stroke: '#000000'}
 typeColors['Tugs/Pilots'] = {fill: '#00BFFF', stroke: '#000000'}
 typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
 
+
+var severity={'Chemical':6, 'Gas':6, 'Passengers':4, 'Petrochemicals':3, 'Ships':2}
+
 var shipData = []
-shipData['Cargo'] = {length: 180, breadth: Math.pow(180.0, 2.0/3) + 1, GT: 100000, cargoType: function() {var items=['Gas','Chemical','Container Cargo', 'Passengers', 'Vehicles'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
+shipData['Cargo'] = {length: 180, breadth: Math.pow(180.0, 2.0/3) + 1, GT: 100000, cargoType: function() {var items=['Gas','Chemical'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
 shipData['Tanker'] = {length: 250, breadth: Math.pow(250.0, 2.0/3) + 1, GT: 200000,cargoType: function() {return 'Petrochemicals'}, max_speed: 25}
 shipData['Passenger'] = {length: 80, breadth: Math.pow(80.0, 2.0/3) + 1, GT: 50000,cargoType: function() {return 'Passengers'}, max_speed: 30}
 shipData['High Speed Craft'] = {length: 40, breadth: Math.pow(40.0, 2.0/3) + 1, GT: 40000, cargoType: function() {return 'Passengers'}, max_speed: 50}
-shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType: function() {return 'Passengers'},max_speed: 15}
+shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType: function() {return 'Ships'},max_speed: 15}
 shipData['Yacht'] = {length: 30, breadth: Math.pow(30.0, 2.0/3) + 1, GT: 30000, cargoType: function() {return 'Passengers'}, max_speed: 40}
 
 function zoomTo(lat, lng) {
 	map.setCenter(new google.maps.LatLng(lat, lng))
 	map.setZoom(14)
 }
+
+var scores=[]
+
+
+function bubbleSort(a)
+{
+    var swapped;
+    do {
+        swapped = false;
+        for (var i=0; i < a.length-1; i++) {
+            if (a[i].score > a[i+1].score) {
+                var temp = a[i];
+                a[i] = a[i+1];
+                a[i+1] = temp;
+                swapped = true;
+            }
+        }
+    } while (swapped);
+}
+
+
 
 function checkForViolations() {
 	for (var i = 0; i < ships.length; i++) {
@@ -38,19 +61,43 @@ function checkForViolations() {
 	pairs = domainViolationService.check(ships)
 
 	document.getElementById('10min').innerHTML = ''
+	scores=[]
 	for (var i = 0; i < pairs.length; i++) {
 		// pairs[i][0].setShipPolyOptions('#000000', '#ff0000', 1, 0.7);
 		// pairs[i][1].setShipPolyOptions('#000000', '#ff0000', 1, 0.7);
 		pairs[i][0].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7);
 		pairs[i][1].setShipDomainPolyOptions('#000000', '#ff0000', 1, 0.7);
-		var li=document.createElement('li');
+		//var li=document.createElement('li');
 
 		var pos1 = coordThings.shiftLatLngMetric(pairs[i][0].basePosition, pairs[i][0].v)
 		var pos2 = coordThings.shiftLatLngMetric(pairs[i][1].basePosition, pairs[i][1].v)
-		map.setZoom(16)
-		li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + pairs[i][0].shipName + '('+pairs[i][0].cargoType+')' + " and " + pairs[i][1].shipName + '('+pairs[i][1].cargoType+')' + "</A> <br ><br>";
+		//map.setZoom(16);
+		//li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + pairs[i][0].shipName + '('+pairs[i][0].cargoType+')' + " and " + pairs[i][1].shipName + '('+pairs[i][1].cargoType+')' + "</A> <br ><br>";
+		var sum=0
+		for (var key in severity){
+			if (pairs[i][0].cargoType==key)
+				sum+=severity[key]
+			if (pairs[i][1].cargoType==key)
+				sum+=severity[key]
+		}
+//		console.log(sum)
+		
+		scores.push({pair:pairs[i], score: sum})
+	}	
+	var newStuff=[]
+	bubbleSort(scores)
+
+	for (var i = scores.length-1; i >=0; i--) {
+		var li=document.createElement('li');
+		var pos1 = coordThings.shiftLatLngMetric(scores[i].pair[0].basePosition, scores[i].pair[0].v)
+		var pos2 = coordThings.shiftLatLngMetric(scores[i].pair[1].basePosition, scores[i].pair[1].v)
+		li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + '<span style="font-size:18">'+scores[i].score/2+ '</span>' +' '+ scores[i].pair[0].shipName + ' 	&nbsp;('+ scores[i].pair[0].cargoType+')' + " and " + scores[i].pair[1].shipName + ' &nbsp;('+ scores[i].pair[1].cargoType+')' + "</A> <br ><br>";
 		document.getElementById('10min').appendChild(li);
 	}
+
+		
+	//console.log(scores)
+	//console.log(scores[score].sort())
 }
 
 function getStatusFunction(ship) {
