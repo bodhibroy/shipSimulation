@@ -18,12 +18,12 @@ typeColors['Tugs/Pilots'] = {fill: '#00BFFF', stroke: '#000000'}
 typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
 
 var shipData = []
-shipData['Cargo'] = {length: 180, breadth: Math.pow(180.0, 2.0/3) + 1, GT: 100000, cargoType: function() {var items=['Gas','Chemical','Container Cargo', 'Passenger', 'Vehicles'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
-shipData['Tanker'] = {length: 250, breadth: Math.pow(250.0, 2.0/3) + 1, GT: 200000,cargoType: 'Oil (Crude/Refined)', max_speed: 25}
-shipData['Passenger'] = {length: 80, breadth: Math.pow(80.0, 2.0/3) + 1, GT: 50000,cargoType: 'Passenger', max_speed: 30}
-shipData['High Speed Craft'] = {length: 40, breadth: Math.pow(40.0, 2.0/3) + 1, GT: 40000, cargoType:'Passenger', max_speed: 50}
-shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType:'Crew',max_speed: 15}
-shipData['Yacht'] = {length: 30, breadth: Math.pow(30.0, 2.0/3) + 1, GT: 30000, cargoType:'Passenger', max_speed: 40}
+shipData['Cargo'] = {length: 180, breadth: Math.pow(180.0, 2.0/3) + 1, GT: 100000, cargoType: function() {var items=['Gas','Chemical','Container Cargo', 'Passengers', 'Vehicles'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
+shipData['Tanker'] = {length: 250, breadth: Math.pow(250.0, 2.0/3) + 1, GT: 200000,cargoType: function() {return 'Oil (Crude/Refined)'}, max_speed: 25}
+shipData['Passenger'] = {length: 80, breadth: Math.pow(80.0, 2.0/3) + 1, GT: 50000,cargoType: function() {return 'Passengers'}, max_speed: 30}
+shipData['High Speed Craft'] = {length: 40, breadth: Math.pow(40.0, 2.0/3) + 1, GT: 40000, cargoType: function() {return 'Passengers'}, max_speed: 50}
+shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType: function() {return 'Passengers'},max_speed: 15}
+shipData['Yacht'] = {length: 30, breadth: Math.pow(30.0, 2.0/3) + 1, GT: 30000, cargoType: function() {return 'Passengers'}, max_speed: 40}
 
 
 function checkForViolations() {
@@ -51,6 +51,17 @@ function checkForViolations() {
 	console.log(pairs);
 }
 
+function getStatusFunction(ship) {
+	return function() { 
+			document.getElementById('sname').innerHTML = ship.shipName
+			document.getElementById('ctype').innerHTML = ship.cargoType
+			var dll = coordThings.shiftLatLngMetric(ship.basePosition, ship.v)
+			document.getElementById('location').innerHTML = (Math.floor(dll.dlat*100)/100) + ' deg N<br>' + (Math.floor(dll.dlng*100)/100) + ' deg E'
+
+			console.log(ship._shipId + ' ' + ship.shipName)
+		}
+}
+
 function initShipSimulation() {
 	for (var i = 0; i < 50; i++) {
 		var thisShipType = randomShipType()
@@ -63,7 +74,12 @@ function initShipSimulation() {
 		ship.theta = Math.random() * -10 - 15
 		ship.setShipType(thisShipType)
 		ship.velocity_in_metres = (shipData[thisShipType].max_speed / 4.0) * (1 + 3 * Math.random())
+
 		ship.GT = shipData[thisShipType].GT
+		ship.setShipName(randomShipName())
+		ship.cargoType = shipData[thisShipType].cargoType()
+
+		ship.setMouseOverListener(getStatusFunction(ship))
 
 		ships.push(ship)
 		// shipIdToIdx[shipID] = ships.length
@@ -90,9 +106,11 @@ function takeASimulationStep() {
 				coordThings.delta((TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.cosDeg(ships[i].theta),
 							(TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.sinDeg(ships[i].theta))
 				)
+		var new_theta = ships[i].theta + (2*Math.random() - 1)*TIME_STEP_IN_MS/1000.0
+		var new_velocity = Math.max(0, ships[i].velocity_in_metres + (2*Math.random()-1) * TIME_STEP_IN_MS / 1000.0 )
 
-		ships[i].updatePosition(new_v, ships[i].theta + Math.random()*TIME_STEP_IN_MS/1000.0)
-		ships[i].velocity_in_metres = Math.max(0, ships[i].velocity_in_metres + Math.random() * TIME_STEP_IN_MS / 1000.0 )
+		ships[i].updatePosition(new_v, new_theta)
+		ships[i].velocity_in_metres = new_velocity
 
 		ships[i].updateDomainParams(2 * ships[i]._dims.breadth,
 									ships[i]._dims.length * (2.5 - Math.exp(- (ships[i].velocity_in_metres / 20.0) * (ships[i].GT / 50000.0))),
@@ -103,7 +121,7 @@ function takeASimulationStep() {
 	// Test for domain violations
 
 
-	window.setTimeout(takeASimulationStep, 20)
+	window.setTimeout(takeASimulationStep, TIME_STEP_IN_MS)
 }
 
 function initialize() {
@@ -138,6 +156,7 @@ function initialize() {
 		google.maps.event.removeListener(startClickListener)
 
 		takeASimulationStep()
+		map.setCenter(new google.maps.LatLng(1.207953, 103.385195))
 	});
 
 	initShipSimulation()
