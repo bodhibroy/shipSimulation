@@ -4,6 +4,11 @@ var shipsIdToIdx=[]
 var idxToShipId=[]
 
 var shipTypes = ['Cargo', 'Tanker', 'Passenger', 'High Speed Craft', 'Tugs/Pilots', 'Yacht']
+
+function randomShipType() {
+	return 'Cargo'
+}
+
 var typeColors = []
 typeColors['Cargo'] = {fill: '#01DF3A', stroke: '#000000'}
 typeColors['Tanker'] = {fill: '#FF0000', stroke: '#000000'}
@@ -46,7 +51,20 @@ function checkForViolations() {
 	console.log(pairs);
 }
 
-function startSimulation() {
+function initShipSimulation() {
+	for (var i = 0; i < routes.length; i++) {
+		var thisShipType = randomShipType()
+		var ship_dimensions = shipFactory.makeShipDims(shipData[thisShipType].length, shipData[thisShipType].breadth, shipData[thisShipType].length/20.0)
+		var ship_location = new google.maps.LatLng(routes[i][0][0], routes[i][0][1])
+
+		var ship = shipFactory.makeEZShip(ship_dimensions, ship_location)
+		ship.next_wp = 1
+		ship.velocity_in_metres = (shipData[thisShipType].max_speed / 4.0) * (1 + 2 * Math.random())
+
+		ships.push(ship)
+		shipIdToIdx[shipID] = ships.length
+		idxToShipId.push(shipID)
+	}
 
 
 
@@ -55,6 +73,10 @@ function startSimulation() {
 		ships[i].setShipPolyOptions(myTypeColor.stroke, myTypeColor.fill, 0.8, 0.6);
 		ships[i].setShipDomainPolyOptions('#000000', '#ff0000', 0.4, 0.2);
 	}
+}
+
+function startShipSimulation() {
+
 }
 
 function initialize() {
@@ -88,8 +110,10 @@ function initialize() {
 		infoWindow.close();
 		google.maps.event.removeListener(startClickListener)
 
-		startSimulation()
+		startShipSimulation()
 	});
+
+	initShipSimulation()
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
