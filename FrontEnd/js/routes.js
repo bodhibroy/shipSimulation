@@ -28,7 +28,7 @@ function heading(p1,p2)
 
 Math.radians = function(degrees) {
   return degrees * Math.PI / 180;
-};
+}
 
 function distance(p1,p2)
 {
@@ -36,16 +36,16 @@ function distance(p1,p2)
     lat1=p1[0]
     lon2=p2[1]
     lat2=p2[0]
-    # convert decimal degrees to radians 
-    lon1=radians(lon1)
-    lat1=radians(lat1)
-    lon2=radians(lon2)
-    lat2=radians(lat2)
-    # haversine formula 
+    // convert decimal degrees to radians 
+    lon1=Math.radians(lon1)
+    lat1=Math.radians(lat1)
+    lon2=Math.radians(lon2)
+    lat2=Math.radians(lat2)
+    //haversine formula 
     dlon = lon2 - lon1 
     dlat = lat2 - lat1 
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * asin(sqrt(a)) 
+    a = Math.pow(Math.sin(dlat/2),2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon/2),2)
+    c = 2 * Math.asin(Math.sqrt(a)) 
     m = 6367 *1000 * c
     return m
 }
