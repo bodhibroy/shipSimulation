@@ -47,7 +47,7 @@ function checkForViolations() {
 
 		var pos1 = coordThings.shiftLatLngMetric(pairs[i][0].basePosition, pairs[i][0].v)
 		var pos2 = coordThings.shiftLatLngMetric(pairs[i][1].basePosition, pairs[i][1].v)
-
+		map.setZoom(16)
 		li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + pairs[i][0].shipName + '('+pairs[i][0].cargoType+')' + " and " + pairs[i][1].shipName + '('+pairs[i][1].cargoType+')' + "</A> <br ><br>";
 		document.getElementById('10min').appendChild(li);
 	}
