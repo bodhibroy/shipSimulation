@@ -1,6 +1,6 @@
 var jumboEastCoast = new google.maps.LatLng(1.305189, 103.930657);
 var ships = [];
-var shipsIdToIdx=[]
+var shipIdToIdx=[]
 var idxToShipId=[]
 
 var shipTypes = ['Cargo', 'Tanker', 'Passenger', 'High Speed Craft', 'Tugs/Pilots', 'Yacht']
@@ -22,8 +22,8 @@ shipData['Cargo'] = {length: 300, breadth: 30, GT: 1000000, cargoType: function(
 shipData['Tanker'] = {length: 400, breadth: 30, GT: 2300000,cargoType: 'Oil (Crude/Refined)', max_speed: 25}
 shipData['Passenger'] = {length: 200, breadth: 30, GT: 100000,cargoType: 'Passenger', max_speed: 30}
 shipData['High Speed Craft'] = {length: 100, breadth: 30, GT: 2300000, cargoType:'Passenger', max_speed: 40}
-shipData['Tugs/Pilots'] = {length: 50, breadth: 30, GT: 2300000, cargoType='Vessels',max_speed: 15}
-shipData['Yacht'] = {length: 35, breadth: 30, GT: 2300000, cargoType='Vessels', max_speed: 50}
+shipData['Tugs/Pilots'] = {length: 50, breadth: 30, GT: 2300000, cargoType:'Crew',max_speed: 15}
+shipData['Yacht'] = {length: 35, breadth: 30, GT: 2300000, cargoType:'Passenger', max_speed: 50}
 
 
 function checkForViolations() {
@@ -58,25 +58,44 @@ function initShipSimulation() {
 		var ship_location = new google.maps.LatLng(routes[i][0][0], routes[i][0][1])
 
 		var ship = shipFactory.makeEZShip(ship_dimensions, ship_location)
-		ship.next_wp = 1
+		ship.setShipType(thisShipType)
 		ship.velocity_in_metres = (shipData[thisShipType].max_speed / 4.0) * (1 + 2 * Math.random())
+		ship.GT = shipData[thisShipType].GT
 
 		ships.push(ship)
-		shipIdToIdx[shipID] = ships.length
-		idxToShipId.push(shipID)
+		// shipIdToIdx[shipID] = ships.length
+		// idxToShipId.push(shipID)
 	}
 
 
 
 	for (var i = 0; i < ships.length; i++) {
+		console.log(ships[i].shipType)
 		var myTypeColor = typeColors[ships[i].shipType]
+		console.log(myTypeColor)
 		ships[i].setShipPolyOptions(myTypeColor.stroke, myTypeColor.fill, 0.8, 0.6);
 		ships[i].setShipDomainPolyOptions('#000000', '#ff0000', 0.4, 0.2);
 	}
 }
 
-function startShipSimulation() {
+var TIME_STEP_IN_MS = 50
+function takeASimulationStep() {
+	for (var i = 0; i < ships.length; i++) {
 
+		var new_v = coordThings.shiftMetricfunction(ships[i].v,
+				coordThings.delta((TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*cos(ships[i].theta), (TIME_STEP_IN_MS/1000) * thisShip.velocity_in_metres*sin(ships[i].theta)))
+		ships[i].updatePosition(new_v, thisShip.theta + Math.random()*TIME_STEP_IN_MS)
+
+		ship[i].updateDomainParams(2 * ships[i]._dims.breadth,
+									ships[i]._dims.length * (2.5 - Math.exp(- (ships[i].velocity_in_metres / 20.0) * (ships[i].GT / 50000.0))),
+									15 * Math.exp(- ships[i].velocity_in_metres / 20.0),
+									0.25 * ships[i]._dims.length)
+	}
+
+	// Test for domain violations
+
+
+	window.setTimeout(takeASimulationStep, 20)
 }
 
 function initialize() {
@@ -110,7 +129,7 @@ function initialize() {
 		infoWindow.close();
 		google.maps.event.removeListener(startClickListener)
 
-		startShipSimulation()
+		takeASimulationStep()
 	});
 
 	initShipSimulation()
