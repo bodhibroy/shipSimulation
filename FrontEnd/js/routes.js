@@ -4,7 +4,56 @@ function randomShipName() {
 }
 
 
+getStationaryPoint=function(){ 
+	var a=[[1.251396, 103.798431],[1.182747, 103.666595]];
+	return a[Math.floor(Math.random()*a.length)];
+}
+
+
 function chuckPointsAtJeremy(){
-	var a=[1.212953, 103.435195]
-	return ([a[0]-Math.random()/10,a[1]+Math.random()/20])
+	// var a=[1.212953, 103.435195]
+	// return ([a[0]-Math.random()/10,a[1]+Math.random()/20])
+
+	var a=[[1.212953, 103.435195],[1.081830, 103.637069],[1.231488, 103.866408]]
+	var b=a[Math.floor(Math.random()*a.length)];
+	return ([b[0]-Math.random()/10,b[1]+Math.random()/100])
+}
+
+
+function heading(p1,p2)
+{
+	return  bearing = 90 - (180/pi)*Math.atan2(p2[1]-p1[1], p2[0]-p1[0])
+}
+
+
+Math.radians = function(degrees) {
+  return degrees * Math.PI / 180;
+};
+
+function distance(p1,p2)
+{
+	lon1=p1[1]
+    lat1=p1[0]
+    lon2=p2[1]
+    lat2=p2[0]
+    # convert decimal degrees to radians 
+    lon1=radians(lon1)
+    lat1=radians(lat1)
+    lon2=radians(lon2)
+    lat2=radians(lat2)
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    m = 6367 *1000 * c
+    return m
+}
+
+function checkHeading(p1,p2)
+{
+	if (distance(p1,p2)<2000)
+		return heading(p1,p2);
+	else
+		return 'Happy sailing!';
 }
