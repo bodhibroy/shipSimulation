@@ -82,6 +82,11 @@ function initShipSimulation() {
 		ship.cargoType = shipData[thisShipType].cargoType()
 
 		ship.setMouseOverListener(getStatusFunction(ship))
+		ship.setMouseOutListener(function() { 
+			document.getElementById('sname').innerHTML = '-'
+			document.getElementById('ctype').innerHTML = '-'
+			document.getElementById('location').innerHTML = '-'
+		})
 
 		ships.push(ship)
 		// shipIdToIdx[shipID] = ships.length
