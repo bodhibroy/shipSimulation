@@ -11,12 +11,10 @@ getStationaryPoint=function(){
 
 
 function chuckPointsAtJeremy(){
-	// var a=[1.212953, 103.435195]
-	// return ([a[0]-Math.random()/10,a[1]+Math.random()/20])
-
-	var a=[[1.212953, 103.435195],[1.081830, 103.637069],[1.231488, 103.866408],[1.287265, 103.552955],[1.256373, 104.211448]]
+	var a=[[1.212953, 103.435195]]
+	//var a=[[1.212953, 103.435195],[1.081830, 103.637069],[1.231488, 103.866408],[1.287265, 103.552955],[1.256373, 104.211448]]
 	var b=a[Math.floor(Math.random()*a.length)];
-	return ([b[0]-Math.random()/10,b[1]+Math.random()/100])
+	return ([b[0]-Math.random()/10,b[1]+Math.random()/10])
 }
 
 

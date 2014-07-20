@@ -108,14 +108,16 @@ function takeASimulationStep() {
 
 	for (var i = 0; i < ships.length; i++) {
 
-		var new_v = coordThings.shiftMetric(ships[i].v,
-				coordThings.delta((TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.cosDeg(ships[i].theta),
-							(TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.sinDeg(ships[i].theta))
-				)
+		var new_position = coordThings.shiftLatLngMetricGoogle(ships[i].basePosition,
+						coordThings.shiftMetric(ships[i].v,
+							coordThings.delta((TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.cosDeg(ships[i].theta),
+								(TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.sinDeg(ships[i].theta))
+							)
+						)
 		var new_theta = ships[i].theta + (2*Math.random() - 1)*TIME_STEP_IN_MS/1000.0
 		var new_velocity = Math.max(0, ships[i].velocity_in_metres + (2*Math.random()-1) * TIME_STEP_IN_MS / 1000.0 )
 
-		ships[i].updatePosition(new_v, new_theta)
+		ships[i].updatePosition(coordThings.delta(0,0), new_theta, new_position)
 		ships[i].velocity_in_metres = new_velocity
 
 		ships[i].updateDomainParams(2 * ships[i]._dims.breadth,
