@@ -17,7 +17,7 @@ typeColors['Tugs/Pilots'] = {fill: '#00BFFF', stroke: '#000000'}
 typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
 
 
-var severity={'Chemical':6, 'Gas':6, 'Passengers':4, 'Petrochemicals':3, 'Ships':2}
+var severity={'Chemical':10, 'Gas':8, 'Passengers':8, 'Petrochemicals':6, 'Ships':4}
 
 var shipData = []
 shipData['Cargo'] = {length: 180, breadth: Math.pow(180.0, 2.0/3) + 1, GT: 100000, cargoType: function() {var items=['Gas','Chemical'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
