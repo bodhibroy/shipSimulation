@@ -104,6 +104,7 @@ function initShipSimulation() {
 }
 
 var TIME_STEP_IN_MS = 50
+var MOVEMENT_MUL = 2
 function takeASimulationStep() {
 
 	for (var i = 0; i < ships.length; i++) {
@@ -114,8 +115,8 @@ function takeASimulationStep() {
 								(TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.sinDeg(ships[i].theta))
 							)
 						)
-		var new_theta = ships[i].theta + (2*Math.random() - 1)*TIME_STEP_IN_MS/1000.0
-		var new_velocity = Math.max(0, ships[i].velocity_in_metres + (2*Math.random()-1) * TIME_STEP_IN_MS / 1000.0 )
+		var new_theta = ships[i].theta + MOVEMENT_MUL*(2*Math.random() - 1)*TIME_STEP_IN_MS/1000.0
+		var new_velocity = Math.max(0, ships[i].velocity_in_metres + MOVEMENT_MUL*(2*Math.random()-1) * TIME_STEP_IN_MS / 1000.0 )
 
 		ships[i].updatePosition(coordThings.delta(0,0), new_theta, new_position)
 		ships[i].velocity_in_metres = new_velocity
@@ -164,7 +165,7 @@ function initialize() {
 		google.maps.event.removeListener(startClickListener)
 
 		takeASimulationStep()
-		map.setCenter(new google.maps.LatLng(1.207953, 103.385195))
+		// map.setCenter(new google.maps.LatLng(1.207953, 103.385195))
 	});
 
 	initShipSimulation()
