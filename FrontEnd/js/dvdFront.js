@@ -17,14 +17,14 @@ typeColors['Tugs/Pilots'] = {fill: '#00BFFF', stroke: '#000000'}
 typeColors['Yacht'] = {fill: '#A4A4A4', stroke: '#000000'}
 
 
-var severity={'Chemical':6, 'Gas':6, 'Passengers':4, 'Petrochemicals':3, 'Ships':2}
+var severity={'Chemical':6, 'Gas':6, 'Passengers':4, 'Petrochemicals':3, 'Crew':2}
 
 var shipData = []
 shipData['Cargo'] = {length: 180, breadth: Math.pow(180.0, 2.0/3) + 1, GT: 100000, cargoType: function() {var items=['Gas','Chemical'];return items[Math.floor(Math.random()*items.length)];}, max_speed: 25}
 shipData['Tanker'] = {length: 250, breadth: Math.pow(250.0, 2.0/3) + 1, GT: 200000,cargoType: function() {return 'Petrochemicals'}, max_speed: 25}
 shipData['Passenger'] = {length: 80, breadth: Math.pow(80.0, 2.0/3) + 1, GT: 50000,cargoType: function() {return 'Passengers'}, max_speed: 30}
 shipData['High Speed Craft'] = {length: 40, breadth: Math.pow(40.0, 2.0/3) + 1, GT: 40000, cargoType: function() {return 'Passengers'}, max_speed: 50}
-shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType: function() {return 'Ships'},max_speed: 15}
+shipData['Tugs/Pilots'] = {length: 35, breadth: Math.pow(35.0, 2.0/3) + 1, GT: 35000, cargoType: function() {return 'Crew'},max_speed: 15}
 shipData['Yacht'] = {length: 30, breadth: Math.pow(30.0, 2.0/3) + 1, GT: 30000, cargoType: function() {return 'Passengers'}, max_speed: 40}
 
 function zoomTo(lat, lng) {
@@ -91,7 +91,7 @@ function checkForViolations() {
 		var li=document.createElement('li');
 		var pos1 = coordThings.shiftLatLngMetric(scores[i].pair[0].basePosition, scores[i].pair[0].v)
 		var pos2 = coordThings.shiftLatLngMetric(scores[i].pair[1].basePosition, scores[i].pair[1].v)
-		li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + '<span style="font-size:18">'+scores[i].score/2+ '</span>' +' '+ scores[i].pair[0].shipName + ' 	&nbsp;('+ scores[i].pair[0].cargoType+')' + " and " + scores[i].pair[1].shipName + ' &nbsp;('+ scores[i].pair[1].cargoType+')' + "</A> <br ><br>";
+		li.innerHTML="<A HREF='javascript:zoomTo("+((pos1.dlat+pos2.dlat)/2)+","+((pos1.dlng+pos2.dlng)/2)+")'>" + '<span style="font-size:18">['+scores[i].score/2+ ']</span>' +' '+ scores[i].pair[0].shipName + ' 	&nbsp;('+ scores[i].pair[0].cargoType+')' + " and " + scores[i].pair[1].shipName + ' &nbsp;('+ scores[i].pair[1].cargoType+')' + "</A> <br ><br>";
 		document.getElementById('10min').appendChild(li);
 	}
 
@@ -124,6 +124,8 @@ function initShipSimulation() {
 		ship.setShipType(thisShipType)
 		ship.velocity_in_metres = 1.8 * (shipData[thisShipType].max_speed / 4.0) * (1 + 3 * Math.random())
 
+		ship.target_velocity_in_metres = 1.8 * (shipData[thisShipType].max_speed / 6.0) * (1 + 5 * Math.random())
+
 		ship.GT = shipData[thisShipType].GT
 		ship.setShipName(randomShipName())
 		ship.cargoType = shipData[thisShipType].cargoType()
@@ -151,19 +153,21 @@ function initShipSimulation() {
 }
 
 var TIME_STEP_IN_MS = 50
-var MOVEMENT_MUL = 2
+var MOVEMENT_MUL = 3
 function takeASimulationStep() {
 
 	for (var i = 0; i < ships.length; i++) {
 
 		var new_position = coordThings.shiftLatLngMetricGoogle(ships[i].basePosition,
 						coordThings.shiftMetric(ships[i].v,
-							coordThings.delta((TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.cosDeg(ships[i].theta),
-								(TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.sinDeg(ships[i].theta))
+							coordThings.delta(MOVEMENT_MUL*(TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.cosDeg(ships[i].theta),
+								MOVEMENT_MUL*(TIME_STEP_IN_MS/1000) * ships[i].velocity_in_metres*coordThings.sinDeg(ships[i].theta))
 							)
 						)
 		var new_theta = ships[i].theta + MOVEMENT_MUL*(2*Math.random() - 1)*TIME_STEP_IN_MS/1000.0
-		var new_velocity = Math.max(0, ships[i].velocity_in_metres + MOVEMENT_MUL*(2*Math.random()-1) * TIME_STEP_IN_MS / 1000.0 )
+		var new_velocity = Math.max(0, ships[i].velocity_in_metres + MOVEMENT_MUL*(2*Math.random()-1) * TIME_STEP_IN_MS / 1000.0 
+											//+ MOVEMENT_MUL * (ships[i].target_velocity_in_metres - ships[i].velocity_in_metres) * TIME_STEP_IN_MS / 2000.0
+											)
 
 		ships[i].updatePosition(coordThings.delta(0,0), new_theta, new_position)
 		ships[i].velocity_in_metres = new_velocity
